@@ -1,0 +1,719 @@
+#NEXUS
+
+    [ File output by Morphobank v3.0 (http://www.morphobank.org); 2025-01-09 19.39.06 ]
+
+    BEGIN TAXA;
+    DIMENSIONS NTAX=21;
+    TAXLABELS
+    		'Colobus guereza'
+		'Papio'
+		'Hylobates'
+		'Pongo pygmaeus'
+		'Gorilla gorilla'
+		'Pan troglodytes'
+		'Sahelanthropus tchadensis'
+		'Ardipithecus ramidus'
+		'Australopithecus anamensis'
+		'Australopithecus afarensis'
+		'Kenyanthropus platyops'
+		'Australopithecus garhi'
+		'Australopithecus africanus'
+		'Australopithecus sediba'
+		'Paranthropus aethiopicus'
+		'Paranthropus robustus'
+		'Paranthropus boisei'
+		'Homo habilis'
+		'Homo rudolfensis'
+		'Homo ergaster'
+		'Homo sapiens'
+    ;
+    ENDBLOCK;
+
+    BEGIN CHARACTERS;
+	DIMENSIONS NCHAR=107;
+	FORMAT DATATYPE=STANDARD GAP=- MISSING=? SYMBOLS="0123456";
+	CHARLABELS
+		 [1] 'SG1. Projection of nasal bones above frontomaxillary suture'
+		 [2] 'SG2. Inferior orbital margin rounded'
+		 [3] 'SG3. Infraorbital foramen location'
+		 [4] 'SG4. Anterior Pillars'
+		 [5] 'SG5. Nasoalveolar clivus contour in coronal plane'
+		 [6] 'SG6. Protrusion of incisor alveoli beyond bicanine line (basal view)'
+		 [7] 'SG7. Nasal cavity entrance'
+		 [8] 'SG8. Palate thickness'
+		 [9] 'SG9. Height of the masseter origin'
+		 [10] 'SG10. M-L thickness of zygomatic arch at root of frontal process'
+		 [11] 'SG11. Anterior projection of zygomatic bone relative to piriform aperture (dishing)'
+		 [12] 'SG12. Anterior palatal depth'
+		 [13] 'SG13. Index of palate protrusion anterior to sellion (facial prognathism)'
+		 [14] 'SG14. Masseteric position relative to sellion'
+		 [15] 'SG15. Maxillary trigon (zygomatico-maxillary step)'
+		 [16] 'SG16. Cranial capacity'
+		 [17] 'SG17. Cerebellar morphology'
+		 [18] 'SG18. O-M sinus present in high frequency'
+		 [19] 'SG19. Anteromedial incursion of the superior temporal lines'
+		 [20] 'SG20. Sagittal crest present, at least in presumptive males'
+		 [21] 'SG21. Compound T/N crest, at least in presumptive males'
+		 [22] 'SG22. Asterionic notch'
+		 [23] 'SG23. Parietal overlap of occipital at asterion, at least in males'
+		 [24] 'SG24. Squamosal suture overlap extensive, at least in males'
+		 [25] 'SG25. Lateral inflation of mastoid process relative to supramastoid crest'
+		 [26] 'SG26. Postorbital constriction'
+		 [27] 'SG27. Pneumatization of temporal squama'
+		 [28] 'SG28. Facial hafting'
+		 [29] 'SG29. Supraglenoid gutter width'
+		 [30] 'SG30. External cranial base flexion'
+		 [31] 'SG31. Horizontal distance between TMJ and upper M2/M3'
+		 [32] 'SG32. Relative depth of mandibular fossa'
+		 [33] 'SG33. Postglenoid process size'
+		 [34] 'SG34. Configuration of tympanic'
+		 [35] 'SG35. Medio-lateral position of external auditory meatus'
+		 [36] 'SG36. Vaginal process'
+		 [37] 'SG37. Eustachian process of tympanic'
+		 [38] 'SG38. Petrous orientation'
+		 [39] 'SG39. Heart shaped foramen magnum'
+		 [40] 'SG40. Inclination nuchal plane'
+		 [41] 'SG41. Position of foramen magnum relative to bi-tympanic line'
+		 [42] 'SG42. Inclination of foramen magnum'
+		 [43] 'SG43. Origin of digastric muscle'
+		 [44] 'SG44. Mandibular cross-sectional area at M1'
+		 [45] 'SG45. Orientation of mandibular symphysis'
+		 [46] 'SG46. Direction of mental foramen opening'
+		 [47] 'SG47. Hollowing above and behind mental foramen'
+		 [48] 'SG48. Width of mandibular extramolar sulcus'
+		 [49] 'SG49. Mandibular deciduous canine shape'
+		 [50] 'SG50. Incisal Reduction'
+		 [51] 'SG51. Canines reduced'
+		 [52] 'SG52. Prominence of median lingual ridge of mandibular canine'
+		 [53] 'SG53. Premolar crown area'
+		 [54] 'SG54. Molar crown area'
+		 [55] 'SG55. Lower dM1 mesial crown profile'
+		 [56] 'SG56. Distal marginal ridge of upper dM2'
+		 [57] 'SG57. Positions of buccal and lingual cusps relative to crown margin (states as for mandibular teeth; reverse for maxillary teeth)'
+		 [58] 'SG58. Frequency of well developed lower P3 metaconid'
+		 [59] 'SG59. Relative enamel thickness'
+		 [60] 'SG60. Dental development rate'
+		 [61] 'SG61. Mesiobuccal protrusion of P3 crown base'
+		 [62] 'SG62=CW86. Orientation of mandibular premolar row (dental arcade shape)'
+		 [63] 'SG63. Parietal Tuber'
+		 [64] 'SG64. Parietomastoid angle'
+		 [65] 'SG65. External auditory meatus size'
+		 [66] 'SG66. Separation of mandibular tooth rows'
+		 [67] 'SG67. Configuration of the superior orbital fissure'
+		 [68] 'SG68. Size of Longus capitis insertion'
+		 [69] 'SG69. Height of articular eminence above occlusal plane'
+		 [70] 'SG70=CW38. Extensive mesial groove on upper canine'
+		 [71] 'MSG1. Supraorbital Hollowing'
+		 [72] 'CW1. Depth of subarcuate fossa'
+		 [73] 'CW2. Orientation and length of the post-incisive planum'
+		 [74] 'CW3. Distinctiveness of angular process of mandible'
+		 [75] 'CW17. Presence/absence of frontal sinus'
+		 [76] 'CW19. Position of infraorbital foramen relative to orbit'
+		 [77] 'CW20. Orientation of zygomatic bone'
+		 [78] 'CW22. Glabellar prominence relative to sella'
+		 [79] 'CW25. Supraorbital Expression'
+		 [80] 'CW26. Supraorbital contour'
+		 [81] 'CW32. Position of zygomatic foramina'
+		 [82] 'CW35. Patency of premaxillary suture in adults from frontal view'
+		 [83] 'CW36. Petrous apex ossified beyond spheno- occipital synchondrosis'
+		 [84] 'CW40. Upper I2 similar in shape to upper I1'
+		 [85] 'CW41. Robustucity of canines'
+		 [86] 'CW42. Basal keel of lower canine'
+		 [87] 'CW43. Basal area of paracone of P3'
+		 [88] 'CW48. Talonid basin of lower dp3'
+		 [89] 'CW50. Distal trigonid crest on lower dp4'
+		 [90] 'CW52. Protocone of upper dp3 in occlusal view'
+		 [91] 'CW54. Crista obliqua of upper dp4'
+		 [92] 'CW59. Insertion of genioglossus'
+		 [93] 'CW60. Insertion of geniohyoideus'
+		 [94] 'CW61. Insertion of digastric'
+		 [95] 'CW64. Condylar canal'
+		 [96] 'CW76. Fovea posterior'
+		 [97] 'CW78. Mandibular corpus depth along tooth row'
+		 [98] 'K6. Relative height of vertex'
+		 [99] 'K11. Midfacial prognathism'
+		 [100] 'K13. Position zygomatic angle'
+		 [101] 'K25. Interorbital width'
+		 [102] 'K34. Anterior pole shape'
+		 [103] 'K36. Supraorbital corner'
+		 [104] 'K58. Nuchal plane form'
+		 [105] 'K66. Zygomatic frontal process lateral margin'
+		 [106] 'B35. Zygomatic prominence development'
+		 [107] 'B61. Buccal grooves of maxillary premolars'
+	;
+	STATELABELS
+		1
+		'Project, tapered'
+		'Project, expanded'
+		'Not Projected'
+		'Variable'
+		,
+		2
+		'No'
+		'Variable'
+		'Yes'
+		,
+		3
+		'High'
+		'Variable'
+		'Low'
+		,
+		4
+		'Absent'
+		'Variable'
+		'Present'
+		,
+		5
+		'Convex'
+		'Straight'
+		'Concave (gutter)'
+		,
+		6
+		'Yes'
+		'No'
+		,
+		7
+		'Stepped, overlap'
+		'Smooth, overlap'
+		'Smooth, no overlap'
+		'Stepped, no overlap'
+		'Variable (stepped with or without overlap)'
+		,
+		8
+		'Thin'
+		'Thick'
+		,
+		9
+		'Low'
+		'Variable'
+		'High'
+		,
+		10
+		'Thin'
+		'Thick'
+		,
+		11
+		'Posterior'
+		'Variable Posterior-Intermediate'
+		'Intermediate'
+		'Variable Intermediate-Anterior'
+		'Anterior (dished)'
+		,
+		12
+		'Shallow'
+		'Variable'
+		'Deep'
+		,
+		13
+		'Hyper-prognathic'
+		'Prognathic'
+		'Variable prog.-mesog.'
+		'Mesognathic'
+		'Orthognathic'
+		,
+		14
+		'At or posterior'
+		'Variable'
+		'At or anterior'
+		,
+		15
+		'Absent'
+		'Variable'
+		'Present'
+		,
+		16
+		'Small'
+		'Intermediate'
+		'Large'
+		'Very Large'
+		,
+		17
+		'Lateral flare, posterior protrusion'
+		'Tucked'
+		,
+		18
+		'No'
+		'Intermediate'
+		'Yes'
+		,
+		19
+		'Weak'
+		'Variable from Moderate to Weak'
+		'Moderate'
+		'Strong'
+		,
+		20
+		'Yes'
+		'No'
+		,
+		21
+		'Extensive'
+		'Variable'
+		'Partial'
+		'Absent'
+		,
+		22
+		'Present'
+		'Variable'
+		'Absent'
+		,
+		23
+		'No'
+		'Yes'
+		,
+		24
+		'Not extensive'
+		'Extensive'
+		,
+		25
+		'Not inflated'
+		'Variable'
+		'Inflated'
+		,
+		26
+		'Marked (<67.5%)'
+		'Variable marked to moderate'
+		'Moderate (67.5-77%)'
+		'Slight (>77%)'
+		,
+		27
+		'Extensive'
+		'Variable'
+		'Reduced'
+		,
+		28
+		'Low'
+		'High'
+		,
+		29
+		'Narrow'
+		'Variable'
+		'Wide'
+		,
+		30
+		'Retroflexed'
+		'Flat'
+		'Moderate'
+		'Flexed'
+		,
+		31
+		'Long'
+		'Short'
+		,
+		32
+		'Shallow'
+		'Variable between shallow and intermediate'
+		'Intermediate'
+		'Variable between intermediate and deep'
+		'Deep'
+		,
+		33
+		'Large'
+		'Mid-sized'
+		'Variable mid.-small'
+		'Small'
+		,
+		34
+		'Tubular (or weak crest)'
+		'Variable tubular or crest'
+		'Crest with vertical plate'
+		'Crest with inclined plate'
+		,
+		35
+		'Medial'
+		'Variable'
+		'Lateral'
+		,
+		36
+		'Small or absent'
+		'Variable'
+		'Moderate to large'
+		,
+		37
+		'Present and prominent'
+		'Variable'
+		'Absent or slight'
+		,
+		38
+		'Sagittal (>55 degrees)'
+		'Variable'
+		'Coronal (< 55 degrees)'
+		,
+		39
+		'Absent'
+		'Variable'
+		'Present'
+		,
+		40
+		'Extremely steep'
+		'Steeply inclined'
+		'Intermediate'
+		'Variable'
+		'Weakly inclined'
+		,
+		41
+		'Well posterior'
+		'At bi-tympanic line'
+		'Variable at or anterior'
+		'Well anterior'
+		,
+		42
+		'Strongly inclined (posterior)'
+		'Roughly horizontal'
+		'Strongly inclined (anterior)'
+		,
+		43
+		'Broad, shallow fossa'
+		'Deep, narrow notch'
+		,
+		44
+		'Small'
+		'Variable'
+		'Large'
+		,
+		45
+		'Receding'
+		'Intermediate/Variable'
+		'Vertical'
+		,
+		46
+		'Anterior'
+		'Variable'
+		'Lateral'
+		'Posterior'
+		,
+		47
+		'Present'
+		'Variable'
+		'Absent'
+		,
+		48
+		'Narrow'
+		'Variable'
+		'Wide'
+		,
+		49
+		'Apex central, mesial convexity low'
+		'Apex variable, mesial convexity variable'
+		'Apex mesial, mesial convexity high'
+		,
+		50
+		'No'
+		'Moderate'
+		'Yes'
+		,
+		51
+		'No'
+		'Somewhat'
+		'Very'
+		,
+		52
+		'Prominent'
+		'Variable'
+		'Weak'
+		,
+		53
+		'Smallest'
+		'State_1'
+		'State_2'
+		'State_3'
+		'State_4'
+		'Largest'
+		,
+		54
+		'Smallest'
+		'State_1'
+		'State_2'
+		'Largest'
+		,
+		55
+		'Mesial marginal ridge (MMR) absent, protoconid anterior, fovea open'
+		'MMR slight, protoconid anterior, fovea open'
+		'MMR slight, protoconid anterior, fovea closed'
+		'MMR thick, protoconid even with metaconid, fovea closed'
+		,
+		56
+		'Low'
+		'High'
+		,
+		57
+		'Buccal and lingual cusps approximate crown margin'
+		'Lingual cusps approximate margin; buccal cusps slightly lingual to margin'
+		'Lingual cusps approximate margin; buccal cusps moderately lingual to margin'
+		'Lingual cusps slightly buccal to margin; buccal cusps moderately lingual to margin'
+		'Lingual cusps moderately buccal to margin; buccal cusps strongly lingual to margin'
+		,
+		58
+		'Absent'
+		'Infrequent'
+		'Frequent'
+		,
+		59
+		'Thin'
+		'Variable'
+		'Thick'
+		'Hyperthick'
+		,
+		60
+		'Delayed'
+		'Intermediate'
+		'Accelerated'
+		,
+		61
+		'Strong'
+		'Moderate'
+		'Variable'
+		'Weak to absent'
+		,
+		62
+		'Parasagittal'
+		'Oblique'
+		,
+		63
+		'Absent'
+		'Present'
+		,
+		64
+		'Strong'
+		'Weak'
+		,
+		65
+		'Small'
+		'Large'
+		,
+		66
+		'Widely Separated'
+		'Narrow Separation'
+		,
+		67
+		'Foramen'
+		'Comma shaped'
+		,
+		68
+		'Large'
+		'Variable'
+		'Small'
+		,
+		69
+		'High above plane'
+		'Near the plane'
+		,
+		70
+		'Yes'
+		'No'
+		,
+		71
+		'Absent'
+		'Variable: Absent to restricted midline'
+		'Restricted midline delimited depression'
+		'Restricted lateral depression'
+		'Supratoral sulcus that extends from midline laterally beyond medial third of orbit'
+		,
+		72
+		'Deep'
+		'Moderately deep to shallow'
+		'Very shallow to absent'
+		,
+		73
+		'Long, weakly inclined'
+		'Intermediate'
+		'Short, steeply inclined'
+		,
+		74
+		'Distinct, with posterior projection'
+		'Not Distinct'
+		,
+		75
+		'Absent'
+		'Present'
+		,
+		76
+		'Foramen beneath middle third of orbital breadth'
+		'Foramen beneath medial third of orbital breadth'
+		,
+		77
+		'Frontal'
+		'Variable'
+		'Fronto-lateral'
+		'Lateral'
+		,
+		78
+		'Strong, projects anterior to sella'
+		'Intermediate, at the level of sella'
+		'Weak, recessed behind sella'
+		,
+		79
+		'Weak'
+		'Intermediate'
+		'Torus-like'
+		,
+		80
+		'Arched'
+		'Variable'
+		'Less arched'
+		,
+		81
+		'At or below plane of orbital rim'
+		'Above plane of orbital rim'
+		,
+		82
+		'Patent'
+		'Variable'
+		'Obliterated'
+		,
+		83
+		'Not ossified'
+		'Ossified, with projection'
+		,
+		84
+		'Dissimilar'
+		'Variable'
+		'Similar'
+		,
+		85
+		'Slender'
+		'More robust'
+		,
+		86
+		'Present'
+		'Reduced'
+		'Absent'
+		,
+		87
+		'Paracone much larger than protocone'
+		'Paracone larger than protocone'
+		'Paracone equals protocone'
+		,
+		88
+		'Open distally'
+		'Closed distally'
+		,
+		89
+		'Does not reach protoconid apex'
+		'Reaches protoconid apex'
+		,
+		90
+		'Larger than paracone'
+		'Smaller than paracone'
+		,
+		91
+		'Weak'
+		'Moderate'
+		'Strong'
+		,
+		92
+		'Above inferior transverse torus'
+		'On inferior transverse torus'
+		,
+		93
+		'Basally on inferior transverse torus'
+		'Higher on inferior transverse torus'
+		'Above inferior transverse torus'
+		,
+		94
+		'Posterior to inferior transverse torus'
+		'Inferior transverse torus'
+		'Variable'
+		'Not on sympysis'
+		,
+		95
+		'Absent or infrequent'
+		'Frequently present'
+		,
+		96
+		'Absent or weak'
+		'Well developed'
+		,
+		97
+		'Shallow mesially'
+		'Constant'
+		'Variable'
+		'Deepens mesially'
+		,
+		98
+		'Low'
+		'Variable'
+		'Intermediate'
+		'High'
+		,
+		99
+		'High'
+		'Intermediate'
+		'Variable low-intermediate'
+		'Low'
+		,
+		100
+		'Below orbit'
+		'At or below'
+		'At orbit'
+		'At or above'
+		'Above'
+		,
+		101
+		'broad'
+		'narrow'
+		,
+		102
+		'rounded'
+		'beaked'
+		,
+		103
+		'Rounded'
+		'Variable'
+		'Squared with weak or absent tubercle'
+		'Squared with prominent tubercle'
+		,
+		104
+		'transversely convex'
+		'variable'
+		'flat'
+		,
+		105
+		'Vertical'
+		'Slightly divergent'
+		'Strongly divergent'
+		,
+		106
+		'Absent or slight'
+		'Present'
+		,
+		107
+		'Marked'
+		'Variable'
+		'Moderate to weak'
+		
+	;
+	MATRIX
+	'Colobus guereza'		                     20000030000010000?21220002200100000210010000010221000000100?0001000210?00101221210100001110000010000110200?
+	'Papio'		                               00000030000000000?20020002012300002000013000020020000000100?00000100104001000122001000011100000130001102002
+	'Hylobates'		                           20000030000010000?31220002200100100000010000010222000000000000010000100110013110011000001010100030000102002
+	'Pongo pygmaeus'		                      30000010000202000030000000002000000000000000010200002100001000000000002211000200111010101111030012001100002
+	'Gorilla gorilla'		                     01000000000010000020000000002102002000010001010200003200000000000100004201102022011010200021101110000131100
+	'Pan troglodytes'		                     00000000000010000021000002000100000000010000000000000000000000000000104211102020021211100021211011110130000
+	'Sahelanthropus tchadensis'		           ?020??????0?3000??2?0????00???0000??000411?0?0?2?01?10??1?0??0???1??0?2????02022????01????????????000?32002
+	'Ardipithecus ramidus'		                000000?0000?10000?2?2??000000?00300000??11100000?110000?200010?000?211?21?1020??1??11111???0111010021?0?002
+	'Australopithecus anamensis'		          ?000010020211200??300??000000100100????4??000200?11?111?202?100?01???1??0?100022????112???2?20?0?2020?30??2
+	'Australopithecus afarensis'		          1000004000011200022000000100020000002103110011010110111011202000100?11221110??2202?212210020120010121031212
+	'Kenyanthropus platyops'		              ?0?011000?2232?0?0202????2?0???2?00???0???????????1??0????2?????0?????????????1?????????????????????0??????
+	'Australopithecus garhi'		              ???00000??001?00??20?????2?0?????????????????????21?42??1?2?3?0??????12??????022????1?2???????????????????0
+	'Australopithecus africanus'		          30111000201121000120320002000202120000041000111101112210322031011000011211101011011212210020110012120022110
+	'Australopithecus sediba'		             20001000?0003000???????0??000??2???????????01212?12210??3221311??0???12?1110202202?2122????????01?12000??12
+	'Paranthropus aethiopicus'		            12202111214012200030001120012100120022241??22222?11?433?423?310010120?2?1????022??1???2????011??1?0401?221?
+	'Paranthropus robustus'		               11222111113022201130220?211113033(1 2)2201043112222212223231423231011001012211102020021012211020?31020220112112
+	'Paranthropus boisei'		                 10102111214132101230121120112304232222243102222222225331423231011012012211101021021012210?20111110330102212
+	'Homo habilis'		                        200110100001300110102100122003122211210421102221?1121120122?3111100211421110202002111221002???0010120021002
+	'Homo rudolfensis'		                    20?011000?223?021001320002200?021?0??2?4???11211?11221?0(1 3)2203111?0???13?10??2010?2??1?2????011?022320002001
+	'Homo ergaster'		                       20001010000240021?0132000220031132022214121022200122101?1221311110?2114?11?0202002?2122?0??001001031002000?
+	'Homo sapiens'		                        20000020000240031101320003200314320222041110232002220010122131111012110221102000020212210020211013320020002
+    ;
+    ENDBLOCK;
+
+          BEGIN ASSUMPTIONS;
+      TYPESET * UNTITLED = unord: 1 - 2 8 35 47 61 72 95 102 - 105, ord: 3 - 7 9 - 34 36 - 46 48 - 60 62 - 71 73 - 94 96 - 101 106 - 107;
+      ENDBLOCK;
+      BEGIN MESQUITE;
+ MESQUITESCRIPTVERSION 2; TITLE AUTO; tell ProjectCoordinator; timeSaved 1438428240965; getEmployee #mesquite.minimal.ManageTaxa.ManageTaxa; tell It; setID 0 8558748572474534294; endTell; getEmployee #mesquite.charMatrices.ManageCharacters.ManageCharacters; tell It; setID 0 1631281342765680356; tell It; setDefaultOrder 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 49 35 36 37 38 39 40 41 42 43 44 45 46 47 48 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80; attachments ; endTell; mqVersion 275; checksumv 0 3 2079769537 null getNumChars 81 numChars 81 getNumTaxa 11 numTaxa 11 short true bits 2305843009213693983 states 31 sumSquaresStatesOnly 4948.0 sumSquares -2.305843009213694E19 longCompressibleToShort false usingShortMatrix true NumFiles 1 NumMatrices 1; mqVersion; endTell; getWindow; tell It; suppress; setResourcesState false false 126; setPopoutState 400; setExplanationSize 0; setAnnotationSize 0; setFontIncAnnot 0; setFontIncExp 0; setSize 1432 815; setLocation 8 23; setFont SanSerif; setFontSize 10; getToolPalette; tell It; endTell; desuppress; endTell; getEmployee #mesquite.minimal.ManageTaxa.ManageTaxa; tell It; showTaxa #8558748572474534294 #mesquite.lists.TaxonList.TaxonList; tell It; setTaxa #8558748572474534294; getWindow; tell It; newAssistant #mesquite.lists.DefaultTaxaOrder.DefaultTaxaOrder; newAssistant #mesquite.lists.TaxonListCurrPartition.TaxonListCurrPartition; setExplanationSize 30; setAnnotationSize 20; setFontIncAnnot 0; setFontIncExp 0; setSize 1306 748; setLocation 8 23; setFont SanSerif; setFontSize 10; getToolPalette; tell It; setTool mesquite.lists.TaxonList.TaxonListWindow.ibeam; endTell; endTell; showWindow; getEmployee #mesquite.lists.ColorTaxon.ColorTaxon; tell It; setColor Red; removeColor off; endTell; getEmployee #mesquite.lists.TaxonListAnnotPanel.TaxonListAnnotPanel; tell It; togglePanel off; endTell; endTell; endTell; getEmployee #mesquite.charMatrices.BasicDataWindowCoord.BasicDataWindowCoord; tell It; showDataWindow #1631281342765680356 #mesquite.charMatrices.BasicDataWindowMaker.BasicDataWindowMaker; tell It; getWindow; tell It; setExplanationSize 30; setAnnotationSize 20; setFontIncAnnot 0; setFontIncExp 0; setSize 1306 748; setLocation 8 23; setFont SanSerif; setFontSize 10; getToolPalette; tell It; setTool mesquite.charMatrices.BasicDataWindowMaker.BasicDataWindow.ibeam; endTell; setActive; setTool mesquite.charMatrices.BasicDataWindowMaker.BasicDataWindow.ibeam; colorCells #mesquite.charMatrices.NoColor.NoColor; colorRowNames #mesquite.charMatrices.TaxonGroupColor.TaxonGroupColor; colorColumnNames #mesquite.charMatrices.CharGroupColor.CharGroupColor; colorText #mesquite.charMatrices.NoColor.NoColor; setBackground White; toggleShowNames on; toggleShowTaxonNames on; toggleTight off; toggleThinRows off; toggleShowChanges on; toggleSeparateLines off; toggleShowStates on; toggleAutoWCharNames on; toggleAutoTaxonNames off; toggleShowDefaultCharNames off; toggleConstrainCW on; toggleBirdsEye off; toggleShowPaleGrid off; toggleShowPaleCellColors off; togglePaleInapplicable on; toggleShowBoldCellText off; toggleAllowAutosize on; toggleColorsPanel off; toggleDiagonal on; setDiagonalHeight 80; toggleLinkedScrolling on; toggleScrollLinkedTables off; getInfoPanel; tell It; btspOpen true; apOpen true; fpOpen true; endTell; toggleInfoPanel on; endTell; showWindow; getWindow; tell It; forceAutosize; endTell; getEmployee #mesquite.charMatrices.ColorByState.ColorByState; tell It; setStateLimit 9; toggleUniformMaximum on; endTell; getEmployee #mesquite.charMatrices.ColorCells.ColorCells; tell It; setColor Red; removeColor off; endTell; getEmployee #mesquite.categ.StateNamesStrip.StateNamesStrip; tell It; showStrip off; endTell; getEmployee #mesquite.charMatrices.AnnotPanel.AnnotPanel; tell It; togglePanel off; endTell; getEmployee #mesquite.charMatrices.CharReferenceStrip.CharReferenceStrip; tell It; showStrip off; endTell; getEmployee #mesquite.charMatrices.QuickKeySelector.QuickKeySelector; tell It; autotabOff; endTell; getEmployee #mesquite.charMatrices.SelSummaryStrip.SelSummaryStrip; tell It; showStrip off; endTell; getEmployee #mesquite.categ.SmallStateNamesEditor.SmallStateNamesEditor; tell It; panelOpen true; endTell; endTell; endTell; getEmployee #mesquite.charMatrices.ManageCharacters.ManageCharacters; tell It; showCharacters #1631281342765680356 #mesquite.lists.CharacterList.CharacterList; tell It; setData 0; getWindow; tell It; newAssistant #mesquite.lists.DefaultCharOrder.DefaultCharOrder; newAssistant #mesquite.lists.CharListInclusion.CharListInclusion; newAssistant #mesquite.lists.CharListPartition.CharListPartition; newAssistant #mesquite.stochchar.CharListProbModels.CharListProbModels; getTable; tell It; rowNamesWidth 261; columnWidth 1 75; endTell; setExplanationSize 30; setAnnotationSize 20; setFontIncAnnot 0; setFontIncExp 0; setSize 1306 748; setLocation 8 23; setFont SanSerif; setFontSize 10; getToolPalette; tell It; setTool mesquite.lists.CharacterList.CharacterListWindow.ibeam; endTell; endTell; showWindow; getEmployee #mesquite.lists.CharListAnnotPanel.CharListAnnotPanel; tell It; togglePanel off; endTell; endTell; endTell; endTell; 
+ENDBLOCK;
+BEGIN MESQUITECHARMODELS;
+ ProbModelSet * UNTITLED = 'Mk1 (est.)': 1 - 81; 
+ENDBLOCK;
