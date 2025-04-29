@@ -1,4 +1,7 @@
 # Setup -------------------------------------------------------------------
+library(ape)
+library(ggplot2)
+library(phytools)
 
 sprMast <- function(tree1, tree2){
   sprDist <- phangorn::SPR.dist(tree1, tree2)
@@ -48,3 +51,42 @@ ggplot()+
   theme_minimal()
 
 hist(sprdist)
+
+
+
+# Mongle et al. (2023) dataset --------------------------------------------
+
+mea23 <- t(list2DF(read.nexus.data("/Users/levi/Documents/GitHub/PCAPhylogenetics/data/mongle_2023_rb.nex")))
+pcaMat <- matrix(data = NA, nrow = nrow(mea23), ncol = ncol(mea23))
+for(i in 1:ncol(mea23)){
+  pcaMat[,i] <- as.numeric(mea23[,i])
+}
+mea23PCA <- pcaMethods::pca(pcaMat, nPcs = 2, method = "ppca")
+
+plotdf <- data.frame(tax = rownames(mea23), pc1 = mea23PCA@scores[,1], pc2 = mea23PCA@scores[,2])
+ggplot()+
+  geom_point(data = plotdf, aes(x = pc1, y = pc2, color = tax))+
+  geom_text(data = plotdf, aes(label = tax, x = pc1, y= pc2), hjust = 0, vjust = -0.5, size = 3) +
+  theme_minimal()
+
+hist(sprdist)
+
+
+# Berger et al. (2015) dataset --------------------------------------------
+
+bea2015 <- t(readxl::read_excel("/Users/levi/Documents/GitHub/PCAPhylogenetics/data/Berger_et_al_2015.xlsx"))
+bea2015 <- bea2015[2:13,]
+
+ape::write.nexus.data(bea2015, "/Users/levi/Documents/GitHub/PCAPhylogenetics/data/Berger_et_al_2015.nex", format = "continuous")
+
+pcaMat <- matrix(data = NA, nrow = nrow(bea2015), ncol = ncol(bea2015))
+for(i in 1:ncol(bea2015)){
+  pcaMat[,i] <- as.numeric(bea2015[,i])
+}
+bea15PCA <- pcaMethods::pca(pcaMat, nPcs = 2, method = "ppca")
+
+plotdf <- data.frame(tax = rownames(bea2015), pc1 = bea15PCA@scores[,1], pc2 = bea15PCA@scores[,2])
+ggplot()+
+  geom_point(data = plotdf, aes(x = pc1, y = pc2, color = tax))+
+  geom_text(data = plotdf, aes(label = tax, x = pc1, y= pc2), hjust = 0, vjust = -0.5, size = 3) +
+  theme_minimal()
