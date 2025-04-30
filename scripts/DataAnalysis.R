@@ -32,7 +32,7 @@ numCharacters <- c(10, 100, 250)
 setRate <- c(0.1, 1, 10)
 proportionConflicting <- c(0, 0.1, 0.25, 0.5) #proportion of characters that exhibit conflicting phylogenetic signal
 numTaxaConflicting <- c(2) #just rearranging 2 taxa to start
-variableRates # drawn from gamma with parameters (1,10); (1,1); (10,1)
+#variableRates # drawn from gamma with parameters (1,10); (1,1); (10,1)
 
 # Simulation --------------------------------------------------------------
 
@@ -338,13 +338,30 @@ simulationFunction <- function(tree){
       }
     }
   }
-  
   return(list("phylo" = write.tree(tree), "resMat" = resMat))
 }
 
-resList <- parallel::mclapply(phyloList, simulationFunction, mc.cores = 13)
+resList <- pbapply::pblapply(phyloList, simulationFunction)
 
 saveRDS(resList, file = "Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
+
+total <- 0
+total0 <- 0
+for(i in resList){
+  df <- i[["resMat"]]
+  total <- nrow(df) + total
+  total0 <- sum(df$RF == 0) + total0  
+}
+
+rfDists <- c()
+sprDists <- c()
+for(i in resList){
+  df <- i[["resMat"]]
+  rfDists <- c(rfDists, df$RF)
+  sprDists <- c(sprDists, df$SPR)
+}
+median(sprDists)
+### sample multiple individuals per taxon
 
 # Mongle et al. (2023) dataset --------------------------------------------
 
