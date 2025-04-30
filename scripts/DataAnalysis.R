@@ -1,7 +1,10 @@
 # Setup -------------------------------------------------------------------
 library(ape)
 library(ggplot2)
+library(phangorn)
 library(phytools)
+
+set.seed(5)
 
 sprMast <- function(tree1, tree2){
   sprDist <- phangorn::SPR.dist(tree1, tree2)
@@ -9,50 +12,339 @@ sprMast <- function(tree1, tree2){
   return(sprDist/mastSize)
 }
 
-gatree <- read.newick(text = "(Papio:0,((Colobus:0.075065,Hylobates:0.178754):0.125803,(Pongo_pygmaeus:0.325375,(Gorilla_gorilla:0.144516,(Pan_troglodytes:0.083517,(Sahelanthropus_tchadensis:0.244099,(Ardipithecus_ramidus:0.091594,(Australopithecus_anamensis:0.212352,(Australopithecus_afarensis:0.108627,(((Kenyanthropus_platyops:0.112281,((Homo_habilis:0.204068,(Homo_ergaster:0.035543,Homo_sapiens:0.175628):0.090888):0.243237,Homo_rudolfensis:0.062298):0.135252):0.127238,Australopithecus_africanus:0.245198):0.266149,(Australopithecus_garhi:0.032466,(Paranthropus_aethiopicus:4.60512e-06,(Paranthropus_robustus:0.243695,Paranthropus_boisei:0.103549):0.296051):0.764347):0.038617):0.067820):0.159549):0.150527):0.091403):0.133450):0.091660):0.089983):0.213719):0.111894);")
-plot(gatree)
+#read tree trace
+trees <- data.table::fread("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/hominin.trees")
+#burn in
+trees <- trees[round(0.1 * nrow(trees)) : nrow(trees),]
+# sample 1,000 trees from the posterior distribution
+treeSubset <- trees[sample(1:nrow(trees), 1000, replace = FALSE), ]
+#convert to phylo object
+phyloList <- list()
+for(i in 1:nrow(treeSubset)){
+  phyloList[[i]] <- ape::read.tree(text = as.character(treeSubset[i, 5]))
+}
+
 
 # Parameters --------------------------------------------------------------
 
-numSims <- 1000
-numCharacters <- 100
-numHomoplasticChars <- 10
+numDatasets <- 100
+numCharacters <- c(10, 100, 250)
+setRate <- c(0.1, 1, 10)
+proportionConflicting <- c(0, 0.1, 0.25, 0.5) #proportion of characters that exhibit conflicting phylogenetic signal
+numTaxaConflicting <- c(2) #just rearranging 2 taxa to start
+variableRates # drawn from gamma with parameters (1,10); (1,1); (10,1)
 
 # Simulation --------------------------------------------------------------
 
-spre <- c()
-rf <- c()
-sprdist <- c()
+### Non parallelized:
 
-for(j in 1:numSims){
-  charmat <- matrix(data = NA, nrow = Ntip(gatree), ncol = numCharacters)
-  rownames(charmat) = gatree$tip.label
-  for(i in 1:numCharacters){
-    traits <- fastBM(gatree, sig2 = 1)
-    #traits <- as.numeric(simSeq(gatree, l = 1))
-    charmat[,i] <- traits
+# resList <- list()
+# 
+# for(i in 1:length(phyloList)){
+#   tree <- phyloList[[i]]
+#   
+#   #resmat:
+#   #columns: rf, spr, spre, numCharacters, setRate, variableRateShape, variableRateScale
+#   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
+#   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
+#   
+#   for(nC in numCharacters){
+#     for(sR in setRate){
+#       for(pc in proportionConflicting){
+#         for(d in numDatasets){
+#         
+#           datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#           rownames(datasetD) = tree$tip.label
+#           for(t in 1:nC){
+#             traits <- fastBM(tree, sig2 = sR)
+#             datasetD[,t] <- traits
+#           }
+#           
+#           whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#           for(t in whichConflicting){
+#             newVec <- datasetD[,t]
+#             tax <- sample(nrow(datasetD), 2, replace = F)
+#             tax1Val <- newVec[tax[1]]
+#             tax2Val <- newVec[tax[2]]
+#             
+#             datasetD[tax[1],t] <- tax2Val
+#             datasetD[tax[2],t] <- tax1Val
+#           }
+#           
+#           pca <- prcomp(datasetD)
+#           plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+#           pcDistMat<- dist(plotdf)
+#           njTree <- nj(pcDistMat)
+#           unrootedTree <- unroot(tree)
+#           unrootedNJTree <- unroot(njTree)
+#           resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
+#           names(resVec) <- NULL
+#           resMat[nrow(resMat) + 1, ] <- resVec
+#         }
+#       }
+#     }
+#     for(vR in 1:3){
+#       for(pc in proportionConflicting){
+#         if(vR == 1){
+#           # 1, 10
+#           for(d in numDatasets){
+#             
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 1, rate = 10)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             
+#             pca <- prcomp(datasetD)
+#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+#             pcDistMat<- dist(plotdf)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }else if (vR == 2){
+#           # 1, 1
+#           for(d in numDatasets){
+#             
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 1, rate = 1)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             
+#             pca <- prcomp(datasetD)
+#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+#             pcDistMat<- dist(plotdf)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }else{
+#           # 10, 1
+#           for(d in numDatasets){
+#             
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 10, rate = 1)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             
+#             pca <- prcomp(datasetD)
+#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+#             pcDistMat<- dist(plotdf)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }
+#       }
+#     }
+#   }
+#   
+#   resList[[i]] <- list("phylo" = write.tree(tree), "resMat" = resMat)
+#   print(i)
+# }
+
+
+simulationFunction <- function(tree){
+  resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
+  colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
+  
+  for(nC in numCharacters){
+    for(sR in setRate){
+      for(pc in proportionConflicting){
+        for(d in numDatasets){
+          
+          datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+          rownames(datasetD) = tree$tip.label
+          for(t in 1:nC){
+            traits <- fastBM(tree, sig2 = sR)
+            datasetD[,t] <- traits
+          }
+          
+          whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+          for(t in whichConflicting){
+            newVec <- datasetD[,t]
+            tax <- sample(nrow(datasetD), 2, replace = F)
+            tax1Val <- newVec[tax[1]]
+            tax2Val <- newVec[tax[2]]
+            
+            datasetD[tax[1],t] <- tax2Val
+            datasetD[tax[2],t] <- tax1Val
+          }
+          
+          pca <- prcomp(datasetD)
+          plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+          pcDistMat<- dist(plotdf)
+          njTree <- nj(pcDistMat)
+          unrootedTree <- unroot(tree)
+          unrootedNJTree <- unroot(njTree)
+          resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
+          names(resVec) <- NULL
+          resMat[nrow(resMat) + 1, ] <- resVec
+        }
+      }
+    }
+    for(vR in 1:3){
+      for(pc in proportionConflicting){
+        if(vR == 1){
+          # 1, 10
+          for(d in numDatasets){
+            
+            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+            rownames(datasetD) = tree$tip.label
+            for(t in 1:nC){
+              rate <- rgamma(1, shape = 1, rate = 10)
+              traits <- fastBM(tree, sig2 = rate)
+              datasetD[,t] <- traits
+            }
+            
+            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+            for(t in whichConflicting){
+              newVec <- datasetD[,t]
+              tax <- sample(nrow(datasetD), 2, replace = F)
+              tax1Val <- newVec[tax[1]]
+              tax2Val <- newVec[tax[2]]
+              
+              datasetD[tax[1],t] <- tax2Val
+              datasetD[tax[2],t] <- tax1Val
+            }
+            
+            pca <- prcomp(datasetD)
+            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+            pcDistMat<- dist(plotdf)
+            njTree <- nj(pcDistMat)
+            unrootedTree <- unroot(tree)
+            unrootedNJTree <- unroot(njTree)
+            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
+            names(resVec) <- NULL
+            resMat[nrow(resMat) + 1, ] <- resVec
+          }
+        }else if (vR == 2){
+          # 1, 1
+          for(d in numDatasets){
+            
+            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+            rownames(datasetD) = tree$tip.label
+            for(t in 1:nC){
+              rate <- rgamma(1, shape = 1, rate = 1)
+              traits <- fastBM(tree, sig2 = rate)
+              datasetD[,t] <- traits
+            }
+            
+            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+            for(t in whichConflicting){
+              newVec <- datasetD[,t]
+              tax <- sample(nrow(datasetD), 2, replace = F)
+              tax1Val <- newVec[tax[1]]
+              tax2Val <- newVec[tax[2]]
+              
+              datasetD[tax[1],t] <- tax2Val
+              datasetD[tax[2],t] <- tax1Val
+            }
+            
+            pca <- prcomp(datasetD)
+            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+            pcDistMat<- dist(plotdf)
+            njTree <- nj(pcDistMat)
+            unrootedTree <- unroot(tree)
+            unrootedNJTree <- unroot(njTree)
+            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
+            names(resVec) <- NULL
+            resMat[nrow(resMat) + 1, ] <- resVec
+          }
+        }else{
+          # 10, 1
+          for(d in numDatasets){
+            
+            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+            rownames(datasetD) = tree$tip.label
+            for(t in 1:nC){
+              rate <- rgamma(1, shape = 10, rate = 1)
+              traits <- fastBM(tree, sig2 = rate)
+              datasetD[,t] <- traits
+            }
+            
+            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+            for(t in whichConflicting){
+              newVec <- datasetD[,t]
+              tax <- sample(nrow(datasetD), 2, replace = F)
+              tax1Val <- newVec[tax[1]]
+              tax2Val <- newVec[tax[2]]
+              
+              datasetD[tax[1],t] <- tax2Val
+              datasetD[tax[2],t] <- tax1Val
+            }
+            
+            pca <- prcomp(datasetD)
+            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+            pcDistMat<- dist(plotdf)
+            njTree <- nj(pcDistMat)
+            unrootedTree <- unroot(tree)
+            unrootedNJTree <- unroot(njTree)
+            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
+            names(resVec) <- NULL
+            resMat[nrow(resMat) + 1, ] <- resVec
+          }
+        }
+      }
+    }
   }
   
-  pca <- prcomp(charmat)
-  plotdf <- data.frame(tax = rownames(charmat), pc1 = pca$x[,1], pc2 = pca$x[,2])
-  
-  pcDistMat<- dist(plotdf)
-  njTree <- nj(pcDistMat)
-  #plot(njTree)
-  spre <- c(spre, sprMast(unroot(gatree), njTree))
-  sprdist <- c(sprdist, TreeDist::SPRDist(unroot(gatree), njTree))
-  rf <- c(rf, dist.topo(unroot(gatree), njTree))
-  print(paste("NG: ", j ," RF:" , dist.topo(unroot(gatree), njTree)))
+  return(list("phylo" = write.tree(tree), "resMat" = resMat))
 }
 
-ggplot()+
-  geom_point(data = plotdf, aes(x = pc1, y = pc2, color = tax))+
-  geom_text(data = plotdf, aes(label = tax, x = pc1, y= pc2), hjust = 0, vjust = -0.5, size = 3) +
-  theme_minimal()
+resList <- parallel::mclapply(phyloList, simulationFunction, mc.cores = 13)
 
-hist(sprdist)
-
-
+saveRDS(resList, file = "Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
 
 # Mongle et al. (2023) dataset --------------------------------------------
 
@@ -90,3 +382,4 @@ ggplot()+
   geom_point(data = plotdf, aes(x = pc1, y = pc2, color = tax))+
   geom_text(data = plotdf, aes(label = tax, x = pc1, y= pc2), hjust = 0, vjust = -0.5, size = 3) +
   theme_minimal()
+
