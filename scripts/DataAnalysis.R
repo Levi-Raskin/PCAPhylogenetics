@@ -18,6 +18,7 @@ trees <- data.table::fread("/Users/levir/Documents/GitHub/PCAPhylogenetics/resul
 trees <- trees[round(0.1 * nrow(trees)) : nrow(trees),]
 # sample 1,000 trees from the posterior distribution
 treeSubset <- trees[sample(1:nrow(trees), 1000, replace = FALSE), ]
+write.csv(treeSubset,"/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/sampledTrees.csv")
 #convert to phylo object
 phyloList <- list()
 for(i in 1:nrow(treeSubset)){
@@ -31,168 +32,11 @@ numDatasets <- 100
 numCharacters <- c(10, 100, 250)
 setRate <- c(0.1, 1, 10)
 proportionConflicting <- c(0, 0.1, 0.25, 0.5) #proportion of characters that exhibit conflicting phylogenetic signal
+# proportionConflicting <- c(0)
 numTaxaConflicting <- c(2) #just rearranging 2 taxa to start
 #variableRates # drawn from gamma with parameters (1,10); (1,1); (10,1)
 
 # Simulation --------------------------------------------------------------
-
-### Non parallelized:
-
-# resList <- list()
-# 
-# for(i in 1:length(phyloList)){
-#   tree <- phyloList[[i]]
-#   
-#   #resmat:
-#   #columns: rf, spr, spre, numCharacters, setRate, variableRateShape, variableRateScale
-#   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
-#   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
-#   
-#   for(nC in numCharacters){
-#     for(sR in setRate){
-#       for(pc in proportionConflicting){
-#         for(d in numDatasets){
-#         
-#           datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-#           rownames(datasetD) = tree$tip.label
-#           for(t in 1:nC){
-#             traits <- fastBM(tree, sig2 = sR)
-#             datasetD[,t] <- traits
-#           }
-#           
-#           whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-#           for(t in whichConflicting){
-#             newVec <- datasetD[,t]
-#             tax <- sample(nrow(datasetD), 2, replace = F)
-#             tax1Val <- newVec[tax[1]]
-#             tax2Val <- newVec[tax[2]]
-#             
-#             datasetD[tax[1],t] <- tax2Val
-#             datasetD[tax[2],t] <- tax1Val
-#           }
-#           
-#           pca <- prcomp(datasetD)
-#           plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#           pcDistMat<- dist(plotdf)
-#           njTree <- nj(pcDistMat)
-#           unrootedTree <- unroot(tree)
-#           unrootedNJTree <- unroot(njTree)
-#           resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
-#           names(resVec) <- NULL
-#           resMat[nrow(resMat) + 1, ] <- resVec
-#         }
-#       }
-#     }
-#     for(vR in 1:3){
-#       for(pc in proportionConflicting){
-#         if(vR == 1){
-#           # 1, 10
-#           for(d in numDatasets){
-#             
-#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-#             rownames(datasetD) = tree$tip.label
-#             for(t in 1:nC){
-#               rate <- rgamma(1, shape = 1, rate = 10)
-#               traits <- fastBM(tree, sig2 = rate)
-#               datasetD[,t] <- traits
-#             }
-#             
-#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-#             for(t in whichConflicting){
-#               newVec <- datasetD[,t]
-#               tax <- sample(nrow(datasetD), 2, replace = F)
-#               tax1Val <- newVec[tax[1]]
-#               tax2Val <- newVec[tax[2]]
-#               
-#               datasetD[tax[1],t] <- tax2Val
-#               datasetD[tax[2],t] <- tax1Val
-#             }
-#             
-#             pca <- prcomp(datasetD)
-#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- dist(plotdf)
-#             njTree <- nj(pcDistMat)
-#             unrootedTree <- unroot(tree)
-#             unrootedNJTree <- unroot(njTree)
-#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
-#             names(resVec) <- NULL
-#             resMat[nrow(resMat) + 1, ] <- resVec
-#           }
-#         }else if (vR == 2){
-#           # 1, 1
-#           for(d in numDatasets){
-#             
-#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-#             rownames(datasetD) = tree$tip.label
-#             for(t in 1:nC){
-#               rate <- rgamma(1, shape = 1, rate = 1)
-#               traits <- fastBM(tree, sig2 = rate)
-#               datasetD[,t] <- traits
-#             }
-#             
-#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-#             for(t in whichConflicting){
-#               newVec <- datasetD[,t]
-#               tax <- sample(nrow(datasetD), 2, replace = F)
-#               tax1Val <- newVec[tax[1]]
-#               tax2Val <- newVec[tax[2]]
-#               
-#               datasetD[tax[1],t] <- tax2Val
-#               datasetD[tax[2],t] <- tax1Val
-#             }
-#             
-#             pca <- prcomp(datasetD)
-#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- dist(plotdf)
-#             njTree <- nj(pcDistMat)
-#             unrootedTree <- unroot(tree)
-#             unrootedNJTree <- unroot(njTree)
-#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
-#             names(resVec) <- NULL
-#             resMat[nrow(resMat) + 1, ] <- resVec
-#           }
-#         }else{
-#           # 10, 1
-#           for(d in numDatasets){
-#             
-#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-#             rownames(datasetD) = tree$tip.label
-#             for(t in 1:nC){
-#               rate <- rgamma(1, shape = 10, rate = 1)
-#               traits <- fastBM(tree, sig2 = rate)
-#               datasetD[,t] <- traits
-#             }
-#             
-#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-#             for(t in whichConflicting){
-#               newVec <- datasetD[,t]
-#               tax <- sample(nrow(datasetD), 2, replace = F)
-#               tax1Val <- newVec[tax[1]]
-#               tax2Val <- newVec[tax[2]]
-#               
-#               datasetD[tax[1],t] <- tax2Val
-#               datasetD[tax[2],t] <- tax1Val
-#             }
-#             
-#             pca <- prcomp(datasetD)
-#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- dist(plotdf)
-#             njTree <- nj(pcDistMat)
-#             unrootedTree <- unroot(tree)
-#             unrootedNJTree <- unroot(njTree)
-#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), SPR.dist(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
-#             names(resVec) <- NULL
-#             resMat[nrow(resMat) + 1, ] <- resVec
-#           }
-#         }
-#       }
-#     }
-#   }
-#   
-#   resList[[i]] <- list("phylo" = write.tree(tree), "resMat" = resMat)
-#   print(i)
-# }
-
 
 simulationFunction <- function(tree){
   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
@@ -242,7 +86,7 @@ simulationFunction <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, rate = 10)
+              rate <- rgamma(1, shape = 1, scale = 10)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -275,7 +119,7 @@ simulationFunction <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, rate = 1)
+              rate <- rgamma(1, shape = 1, scale = 1)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -308,7 +152,7 @@ simulationFunction <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 10, rate = 1)
+              rate <- rgamma(1, shape = 10, scale = 1)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -392,7 +236,7 @@ simulationFunctionAllPCs <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, rate = 10)
+              rate <- rgamma(1, shape = 1, scale = 10)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -424,7 +268,7 @@ simulationFunctionAllPCs <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, rate = 1)
+              rate <- rgamma(1, shape = 1, scale = 1)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -456,7 +300,7 @@ simulationFunctionAllPCs <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 10, rate = 1)
+              rate <- rgamma(1, shape = 10, scale = 1)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -563,7 +407,7 @@ simulationFunction <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, rate = 10)
+              rate <- rgamma(1, shape = 1, scale = 10)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -596,7 +440,7 @@ simulationFunction <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, rate = 1)
+              rate <- rgamma(1, shape = 1, scale = 1)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -629,7 +473,7 @@ simulationFunction <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 10, rate = 1)
+              rate <- rgamma(1, shape = 10, scale = 1)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -798,7 +642,7 @@ simulationFunction <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, rate = 10)
+              rate <- rgamma(1, shape = 1, scale = 10)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -831,7 +675,7 @@ simulationFunction <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, rate = 1)
+              rate <- rgamma(1, shape = 1, scale = 1)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -864,7 +708,7 @@ simulationFunction <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 10, rate = 1)
+              rate <- rgamma(1, shape = 10, scale = 1)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -966,7 +810,7 @@ simulationFunctionAllPCs <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, rate = 10)
+              rate <- rgamma(1, shape = 1, scale = 10)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -998,7 +842,7 @@ simulationFunctionAllPCs <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, rate = 1)
+              rate <- rgamma(1, shape = 1, scale = 1)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
@@ -1030,7 +874,7 @@ simulationFunctionAllPCs <- function(tree){
             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
             rownames(datasetD) = tree$tip.label
             for(t in 1:nC){
-              rate <- rgamma(1, shape = 10, rate = 1)
+              rate <- rgamma(1, shape = 10, scale = 1)
               traits <- fastBM(tree, sig2 = rate)
               datasetD[,t] <- traits
             }
