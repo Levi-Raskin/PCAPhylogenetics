@@ -44,7 +44,6 @@ for(i in 1:nrow(treeSubset)){
   phyloList[[i]] <- ape::read.tree(text = as.character(treeSubset[i, 2]))
 }
 
-
 # Parameters --------------------------------------------------------------
 
 numDatasets <- 100
