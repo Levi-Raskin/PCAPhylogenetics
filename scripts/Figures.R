@@ -1,8 +1,15 @@
+<<<<<<< Updated upstream
 library(dplyr)
 library(ggplot2)
 library(ggtree)
 
 output <- "/Users/levir/Documents/GitHub/PCAPhylogenetics/manuscript/figures/"
+=======
+library(ggplot2)
+library(ggtree)
+
+output <- "/Users/levir/Documents/GitHub/PCAPhylogenetics/manuscript/figures"
+>>>>>>> Stashed changes
 
 treeSubset <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/sampledTrees.tsv")
 
@@ -13,6 +20,7 @@ for(i in 1:nrow(treeSubset)){
 }
 
 
+<<<<<<< Updated upstream
 # Figure: LDDMM continuous traits --------------------------------------------
 
 tree <- phyloList[[1]]
@@ -155,3 +163,10 @@ ggsave(paste(output, "fig1LDDMMAlpha0.8.svg", sep = ""),
        width = 5,
        height = 30)
 
+=======
+# Figure: BM continuous traits --------------------------------------------
+
+tree <- phyloList[[1]]
+tree$tip.label <- gsub("_", tree$tip.label, replacement = " ")
+tree <- ggtree()
+>>>>>>> Stashed changes
