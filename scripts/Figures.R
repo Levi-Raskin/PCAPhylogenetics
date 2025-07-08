@@ -1,4 +1,6 @@
 library(dplyr)
+library(gghalves)
+library(ggnewscale)
 library(ggplot2)
 library(ggtree)
 library(plotly)
@@ -579,6 +581,47 @@ ggsave(filename = paste(output, "3Dfig1LDDMMAlpha08LM25.svg", sep = ""),
 
 # Figure: BM continuous traits --------------------------------------------
 
-tree <- phyloList[[1]]
-tree$tip.label <- gsub("_", tree$tip.label, replacement = " ")
-tree <- ggtree()
+simResPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
+
+for(i in 1:length(simResPC1PC2)){
+  if(i == 1){
+    concatDF <- simResPC1PC2[[1]]$resMat
+  }else{
+    concatDF <- rbind(concatDF, simResPC1PC2[[i]]$resMat)
+  }
+}
+concatDF$numCharacters <- as.factor(concatDF$numCharacters)
+concatDF$setRate <- as.factor(concatDF$setRate)
+concatDF$propConflicting <- as.factor(concatDF$propConflicting)
+concatDF$varRateExpectation <- concatDF$variableRateShape / concatDF$variableRateScale
+concatDF$varRateExpectation <- as.factor(concatDF$varRateExpectation)
+
+## set rate vs. variable rates
+n_colors <- length(unique(concatDF$setRate))  # Adjust based on your data
+blue_colors <- brewer.pal(max(3, n_colors + 2), "Blues")[(3):(n_colors + 2)]  # Skip first 2 colors
+red_colors <- brewer.pal(max(3, n_colors + 2), "Reds")[(3):(n_colors + 2)]  # Skip first 2 colors
+
+ggplot() +
+  geom_half_point(data = filter(concatDF, is.na(varRateExpectation)),
+                  aes(x = numCharacters, y = SPR, color = setRate))+
+  scale_color_manual(values = blue_colors) +
+  new_scale_color()+
+  geom_half_point(data = filter(concatDF, is.na(setRate)),
+                  aes(x = numCharacters, y = SPR, color = varRateExpectation), side = "left")+
+  scale_color_manual(values = red_colors) +
+  new_scale_color()+
+  scale_y_continuous(breaks = 0:12) +
+  theme_minimal() +
+  theme(legend.position = "right",
+        panel.grid.minor = element_blank())
+
+n_colors <- length(unique(concatDF$propConflicting))
+blue_colors <- brewer.pal(max(3, n_colors + 2), "Blues")[(3):(n_colors + 2)] 
+ggplot() +
+  geom_half_point(data = concatDF,
+                  aes(x = numCharacters, y = SPR, color = propConflicting), side = "left")+
+  scale_color_manual(values = blue_colors) +
+  scale_y_continuous(breaks = 0:12) +
+  theme_minimal() +
+  theme(legend.position = "right",
+        panel.grid.minor = element_blank())
