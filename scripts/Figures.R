@@ -4,6 +4,7 @@ library(ggnewscale)
 library(ggplot2)
 library(ggtree)
 library(plotly)
+library(RColorBrewer)
 
 output <- "/Users/levir/Documents/GitHub/PCAPhylogenetics/manuscript/figures/"
 
@@ -582,6 +583,9 @@ ggsave(filename = paste(output, "3Dfig1LDDMMAlpha08LM25.svg", sep = ""),
 # Figure: BM continuous traits --------------------------------------------
 
 simResPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
+simRes2550PC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults25char50char.rds")
+
+simResPC1PC2 <- c(simResPC1PC2, simRes2550PC1PC2)
 
 for(i in 1:length(simResPC1PC2)){
   if(i == 1){
@@ -602,14 +606,14 @@ blue_colors <- brewer.pal(max(3, n_colors + 2), "Blues")[(3):(n_colors + 2)]  # 
 red_colors <- brewer.pal(max(3, n_colors + 2), "Reds")[(3):(n_colors + 2)]  # Skip first 2 colors
 
 ggplot() +
-  geom_half_point(data = filter(concatDF, is.na(varRateExpectation)),
-                  aes(x = numCharacters, y = SPR, color = setRate))+
-  scale_color_manual(values = blue_colors) +
-  new_scale_color()+
-  geom_half_point(data = filter(concatDF, is.na(setRate)),
-                  aes(x = numCharacters, y = SPR, color = varRateExpectation), side = "left")+
-  scale_color_manual(values = red_colors) +
-  new_scale_color()+
+  geom_half_violin(data = filter(concatDF, is.na(varRateExpectation)),
+                  aes(x = numCharacters, y = SPR, fill = setRate), side = "r")+
+  scale_fill_manual(values = blue_colors) +
+  new_scale_fill()+
+  geom_half_violin(data = filter(concatDF, is.na(setRate)),
+                  aes(x = numCharacters, y = SPR, fill = varRateExpectation), side = "l")+
+  scale_fill_manual(values = red_colors) +
+  new_scale_fill()+
   scale_y_continuous(breaks = 0:12) +
   theme_minimal() +
   theme(legend.position = "right",
