@@ -1,5 +1,6 @@
 # Setup -------------------------------------------------------------------
 library(ape)
+library(dplyr)
 library(ggplot2)
 library(ggtree)
 library(phangorn)
@@ -635,7 +636,7 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 
 # simulation - 500 characters ---------------------------------------------
 
-numCharacters <- c(25, 50)
+numCharacters <- c(500)
 
 simulationFunction <- function(tree, treeIdx){
   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
@@ -1363,23 +1364,114 @@ simResPC1PC2 <- c(simResPC1PC2, simRes2550PC1PC2)
 
 for(i in 1:length(simResPC1PC2)){
   if(i == 1){
-    concatDF <- simResPC1PC2[[1]]$resMat
+    concatDFPC1PC2 <- simResPC1PC2[[1]]$resMat
   }else{
-    concatDF <- rbind(concatDF, simResPC1PC2[[i]]$resMat)
+    concatDFPC1PC2 <- rbind(concatDFPC1PC2, simResPC1PC2[[i]]$resMat)
   }
 }
-concatDF$numCharacters <- as.factor(concatDF$numCharacters)
-concatDF$setRate <- as.factor(concatDF$setRate)
-concatDF$propConflicting <- as.factor(concatDF$propConflicting)
-concatDF$varRateExpectation <- concatDF$variableRateShape / concatDF$variableRateScale
-concatDF$varRateExpectation <- as.factor(concatDF$varRateExpectation)
+concatDFPC1PC2$numCharacters <- as.factor(concatDFPC1PC2$numCharacters)
+concatDFPC1PC2$setRate <- as.factor(concatDFPC1PC2$setRate)
+concatDFPC1PC2$propConflicting <- as.factor(concatDFPC1PC2$propConflicting)
+concatDFPC1PC2$varRateExpectation <- concatDFPC1PC2$variableRateShape / concatDFPC1PC2$variableRateScale
+concatDFPC1PC2$varRateExpectation <- as.factor(concatDFPC1PC2$varRateExpectation)
+
+#num trees identical
+sum(concatDFPC1PC2$RF == 0) / nrow(concatDFPC1PC2)
+
+summary(concatDFPC1PC2$RF)
+
+
+simResAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs.rds")
+simRes2550All <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs25char50char.rds")
+
+simResAll <- c(simResAll, simRes2550All)
+
+for(i in 1:length(simResAll)){
+  if(i == 1){
+    concatDFAll <- simResAll[[1]]$resMat
+  }else{
+    concatDFAll <- rbind(concatDFAll, simResAll[[i]]$resMat)
+  }
+}
+concatDFAll$numCharacters <- as.factor(concatDFAll$numCharacters)
+concatDFAll$setRate <- as.factor(concatDFAll$setRate)
+concatDFAll$propConflicting <- as.factor(concatDFAll$propConflicting)
+concatDFAll$varRateExpectation <- concatDFAll$variableRateShape / concatDFAll$variableRateScale
+concatDFAll$varRateExpectation <- as.factor(concatDFAll$varRateExpectation)
+
+#num trees identical
+sum(concatDFAll$RF == 0) / nrow(concatDFAll)
+
+summary(concatDFAll$RF)
+
+
+
+simResMahalPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsMahalanobisDistancePC1PC2.rds")
+simResMahalPC1PC22550 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsMahalanobisDistancePC1PC225char50char.rds")
+
+simResMahalPC1PC2 <- c(simResMahalPC1PC2, simResMahalPC1PC22550)
+
+for(i in 1:length(simResMahalPC1PC2)){
+  if(i == 1){
+    concatDFMPC12 <- simResMahalPC1PC2[[1]]$resMat
+  }else{
+    concatDFMPC12 <- rbind(concatDFMPC12, simResMahalPC1PC2[[i]]$resMat)
+  }
+}
+concatDFMPC12$numCharacters <- as.factor(concatDFMPC12$numCharacters)
+concatDFMPC12$setRate <- as.factor(concatDFMPC12$setRate)
+concatDFMPC12$propConflicting <- as.factor(concatDFMPC12$propConflicting)
+concatDFMPC12$varRateExpectation <- concatDFMPC12$variableRateShape / concatDFMPC12$variableRateScale
+concatDFMPC12$varRateExpectation <- as.factor(concatDFMPC12$varRateExpectation)
+
+#num trees identical
+sum(concatDFMPC12$RF == 0) / nrow(concatDFMPC12)
+sum(concatDFMPC12$RF == 0)
+
+summary(concatDFMPC12$SPR)
+summary(concatDFMPC12$RF)
+
 
 
 #are the distributions sig. different between set rate and varrate expectation across numcharacters
-nc <- unique(concatDF$numCharacters)
+nc <- unique(concatDFPC1PC2$numCharacters)
+varRatesLG <- TRUE
 rate <- c(0.1, 1, 10)
+meanDiff <- c()
 for(c in nc){
   for(r in rate){
-    wilcox.test(filter(concatDF, numCharacters == c, setRate == r)$SPR, filter(concatDF, numCharacters == c, varRateExpectation == r)$SPR)
+    print(paste(c,"characters for rate", r))
+    print("Mean for set rate: ")
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$SPR))
+    print("Mean for var rate: ")
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r)$SPR))
+    
+    if(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r)$SPR) < mean(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$SPR)){
+      varRatesLG <- FALSE
+    }
+    
+    print(paste("p =", wilcox.test(filter(concatDFPC1PC2, numCharacters == c, setRate == r)$SPR, filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR)$p.value))
+    print("------------------------------")
   }
 }
+
+
+nc <- unique(concatDFAll$numCharacters)
+rate <- c(0.1, 1, 10)
+varRatesLG <- TRUE
+for(c in nc){
+  for(r in rate){
+    print(paste(c,"characters for rate", r))
+    print("Mean for set rate: ")
+    print(mean(filter(concatDFAll, numCharacters == c, setRate == r)$SPR))
+    print("Mean for var rate: ")
+    print(mean(filter(concatDFAll, numCharacters == c, varRateExpectation == r)$SPR))
+    if(mean(filter(concatDFAll, numCharacters == c, varRateExpectation == r)$SPR) < mean(filter(concatDFAll, numCharacters == c, setRate == r, propConflicting ==0)$SPR)){
+      varRatesLG <- FALSE
+    }
+    
+    print(paste("p =", wilcox.test(filter(concatDFAll, numCharacters == c, setRate == r, propConflicting ==0)$SPR, filter(concatDFAll, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR)$p.value))
+    print("------------------------------")
+  }
+}
+
