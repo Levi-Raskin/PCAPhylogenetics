@@ -289,8 +289,6 @@ resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
 
 saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs.rds")
 
-
-
 # Simulation-- 25, 50 characters -----------------------------------------
 
 numCharacters <- c(25, 50)
@@ -980,10 +978,10 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 # LDDMM results -----------------------------------------------------------
 
 analysisFunction <- function(lddmmFile){
-  resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
-  colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
-  tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=Index).*?(?=Alpha)", lddmmFile, perl = TRUE)))]]
-  dimension <- (regmatches(lddmmFile, regexpr("(?<=SimRes//).*?(?=Dimension)", lddmmFile, perl = TRUE)))
+  tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
+  dimension <- (regmatches(lddmmFile, regexpr("(?<=LDDMMSimRes/).*?(?=Dimension)", lddmmFile, perl = TRUE)))
+  numLandmarks <- as.numeric(regmatches(lddmmFile, regexpr("(?<=LM).*?(?=Alpha)", lddmmFile, perl = TRUE)))
+  alpha <- as.numeric(regmatches(lddmmFile, regexpr("(?<=Alpha).*?(?=Dataset)", lddmmFile, perl = TRUE)))
   if(dimension == "three"){
     dimension <- 3
   }else if(dimension == "two"){
@@ -1010,170 +1008,25 @@ analysisFunction <- function(lddmmFile){
   njTree <- nj(pcDistMat)
   unrootedTree <- unroot(tree)
   unrootedNJTree <- unroot(njTree)
-  return(rSPRFunc(unrootedNJTree, unrootedTree))
+  
+  sprd <- rSPRFunc(unrootedNJTree, unrootedTree)
+  
+  resMat <- c(dist.topo(unrootedNJTree, unrootedTree), sprd, sprd / Ntip(mast(unrootedNJTree, unrootedTree)),numLandmarks, dimension, alpha)
+  names(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
+  
+  return(resMat)
 }
 
-lddmmFiles <- list.files("results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes/",full.names = T)
+lddmmFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes",full.names = T)
 
-res <- parallel::mclapply(lddmmFiles, FUN = analysisFunction, mc.cores = 12)
+res <- pbapply::pblapply(lddmmFiles, FUN = analysisFunction)
 
-### sample multiple individuals per taxon
-# simulationFunction <- function(tree){
-#   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
-#   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
-#   
-#   for(nC in numCharacters){
-#     for(sR in setRate){
-#       for(pc in proportionConflicting){
-#         for(d in numDatasets){
-#           
-#           sim <- Rphylopars::simtraits(
-#             ntraits      = nC,         # number of traits
-#             nreps        = 10,        # individuals per taxon
-#             tree         = tree,      # NULL → generates a random tree of size ntaxa
-#             intraspecific = 0.1,     # within-species variance (per individual)
-#             model        = "BM"       # Brownian motion
-#           )
-#           datasetD = as.matrix(sim$trait_data[,2:(nC+1)])
-#           rownames(datasetD) = sim$trait_data[,1]
-#           
-#           whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-#           for(t in whichConflicting){
-#             newVec <- datasetD[,t]
-#             tax <- sample(nrow(datasetD), 2, replace = F)
-#             tax1Val <- newVec[tax[1]]
-#             tax2Val <- newVec[tax[2]]
-#             
-#             datasetD[tax[1],t] <- tax2Val
-#             datasetD[tax[2],t] <- tax1Val
-#           }
-#           
-#           pca <- prcomp(datasetD)
-#           pcDistMat<- dist(pca$x[,1:2])
-#           njTree <- nj(pcDistMat)
-#           unrootedTree <- unroot(tree)
-#           unrootedNJTree <- unroot(njTree)
-#           resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
-#           names(resVec) <- NULL
-#           resMat[nrow(resMat) + 1, ] <- resVec
-#         }
-#       }
-#     }
-#     for(vR in 1:3){
-#       for(pc in proportionConflicting){
-#         if(vR == 1){
-#           # 1, 10
-#           for(d in numDatasets){
-#             
-#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-#             rownames(datasetD) = tree$tip.label
-#             for(t in 1:nC){
-#               rate <- rgamma(1, shape = 1, scale = 10)
-#               traits <- fastBM(tree, sig2 = rate)
-#               datasetD[,t] <- traits
-#             }
-#             
-#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-#             for(t in whichConflicting){
-#               newVec <- datasetD[,t]
-#               tax <- sample(nrow(datasetD), 2, replace = F)
-#               tax1Val <- newVec[tax[1]]
-#               tax2Val <- newVec[tax[2]]
-#               
-#               datasetD[tax[1],t] <- tax2Val
-#               datasetD[tax[2],t] <- tax1Val
-#             }
-#             
-#             pca <- prcomp(datasetD)
-#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- dist(plotdf)
-#             njTree <- nj(pcDistMat)
-#             unrootedTree <- unroot(tree)
-#             unrootedNJTree <- unroot(njTree)
-#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
-#             names(resVec) <- NULL
-#             resMat[nrow(resMat) + 1, ] <- resVec
-#           }
-#         }else if (vR == 2){
-#           # 1, 1
-#           for(d in numDatasets){
-#             
-#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-#             rownames(datasetD) = tree$tip.label
-#             for(t in 1:nC){
-#               rate <- rgamma(1, shape = 1, scale = 1)
-#               traits <- fastBM(tree, sig2 = rate)
-#               datasetD[,t] <- traits
-#             }
-#             
-#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-#             for(t in whichConflicting){
-#               newVec <- datasetD[,t]
-#               tax <- sample(nrow(datasetD), 2, replace = F)
-#               tax1Val <- newVec[tax[1]]
-#               tax2Val <- newVec[tax[2]]
-#               
-#               datasetD[tax[1],t] <- tax2Val
-#               datasetD[tax[2],t] <- tax1Val
-#             }
-#             
-#             pca <- prcomp(datasetD)
-#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- dist(plotdf)
-#             njTree <- nj(pcDistMat)
-#             unrootedTree <- unroot(tree)
-#             unrootedNJTree <- unroot(njTree)
-#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
-#             names(resVec) <- NULL
-#             resMat[nrow(resMat) + 1, ] <- resVec
-#           }
-#         }else{
-#           # 10, 1
-#           for(d in numDatasets){
-#             
-#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-#             rownames(datasetD) = tree$tip.label
-#             for(t in 1:nC){
-#               rate <- rgamma(1, shape = 10, scale = 1)
-#               traits <- fastBM(tree, sig2 = rate)
-#               datasetD[,t] <- traits
-#             }
-#             
-#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-#             for(t in whichConflicting){
-#               newVec <- datasetD[,t]
-#               tax <- sample(nrow(datasetD), 2, replace = F)
-#               tax1Val <- newVec[tax[1]]
-#               tax2Val <- newVec[tax[2]]
-#               
-#               datasetD[tax[1],t] <- tax2Val
-#               datasetD[tax[2],t] <- tax1Val
-#             }
-#             
-#             pca <- prcomp(datasetD)
-#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- dist(plotdf)
-#             njTree <- nj(pcDistMat)
-#             unrootedTree <- unroot(tree)
-#             unrootedNJTree <- unroot(njTree)
-#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
-#             names(resVec) <- NULL
-#             resMat[nrow(resMat) + 1, ] <- resVec
-#           }
-#         }
-#       }
-#     }
-#   }
-#   return(list("phylo" = write.tree(tree), "resMat" = resMat))
-# }
-# 
-# resList <- pbapply::pblapply(phyloList, simulationFunction)
-# 
-# saveRDS(resList, file = "Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsIntraspecificVar.rds")
-# 
-# ggplot()+
-#   geom_point(data= plotdf, aes(x=pc1, y = pc2, color = tax))
-# 
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- res[[i]]
+}
+
+
 # # Mongle et al. (2023) dataset --------------------------------------------
 # 
 # mea23 <- t(list2DF(read.nexus.data("/Users/levir/Documents/GitHub/PCAPhylogenetics/data/mongle_2023_rb.nex")))
@@ -1359,8 +1212,10 @@ mean(sprDists)
 
 simResPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
 simRes2550PC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults25char50char.rds")
+simRes500PC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults500char.rds")
 
-simResPC1PC2 <- c(simResPC1PC2, simRes2550PC1PC2)
+
+simResPC1PC2 <- c(simResPC1PC2, simRes2550PC1PC2, simRes500PC1PC2)
 
 for(i in 1:length(simResPC1PC2)){
   if(i == 1){
@@ -1369,6 +1224,7 @@ for(i in 1:length(simResPC1PC2)){
     concatDFPC1PC2 <- rbind(concatDFPC1PC2, simResPC1PC2[[i]]$resMat)
   }
 }
+
 concatDFPC1PC2$numCharacters <- as.factor(concatDFPC1PC2$numCharacters)
 concatDFPC1PC2$setRate <- as.factor(concatDFPC1PC2$setRate)
 concatDFPC1PC2$propConflicting <- as.factor(concatDFPC1PC2$propConflicting)
@@ -1377,14 +1233,16 @@ concatDFPC1PC2$varRateExpectation <- as.factor(concatDFPC1PC2$varRateExpectation
 
 #num trees identical
 sum(concatDFPC1PC2$RF == 0) / nrow(concatDFPC1PC2)
-
+sum(concatDFPC1PC2$RF == 0)
+nrow(concatDFPC1PC2)
 summary(concatDFPC1PC2$RF)
-
+summary(concatDFPC1PC2$SPR)
 
 simResAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs.rds")
 simRes2550All <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs25char50char.rds")
+simRes500All <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs500char.rds")
 
-simResAll <- c(simResAll, simRes2550All)
+simResAll <- c(simResAll, simRes2550All, simRes500All)
 
 for(i in 1:length(simResAll)){
   if(i == 1){
@@ -1401,15 +1259,17 @@ concatDFAll$varRateExpectation <- as.factor(concatDFAll$varRateExpectation)
 
 #num trees identical
 sum(concatDFAll$RF == 0) / nrow(concatDFAll)
-
+sum(concatDFAll$RF == 0) 
 summary(concatDFAll$RF)
+summary(concatDFAll$SPR)
 
 
 
 simResMahalPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsMahalanobisDistancePC1PC2.rds")
 simResMahalPC1PC22550 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsMahalanobisDistancePC1PC225char50char.rds")
+simResMahalPC1PC2500 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsMahalanobisDistancePC1PC2500char.rds")
 
-simResMahalPC1PC2 <- c(simResMahalPC1PC2, simResMahalPC1PC22550)
+simResMahalPC1PC2 <- c(simResMahalPC1PC2, simResMahalPC1PC22550, simResMahalPC1PC2500)
 
 for(i in 1:length(simResMahalPC1PC2)){
   if(i == 1){
@@ -1444,17 +1304,16 @@ for(c in nc){
     print("Mean for set rate: ")
     print(mean(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$SPR))
     print("Mean for var rate: ")
-    print(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r)$SPR))
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR))
     
-    if(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r)$SPR) < mean(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$SPR)){
+    if(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR) < mean(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$SPR) && r != 10){
       varRatesLG <- FALSE
     }
     
-    print(paste("p =", wilcox.test(filter(concatDFPC1PC2, numCharacters == c, setRate == r)$SPR, filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR)$p.value))
+    print(paste("p =", wilcox.test(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$SPR, filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR)$p.value))
     print("------------------------------")
   }
 }
-
 
 nc <- unique(concatDFAll$numCharacters)
 rate <- c(0.1, 1, 10)
@@ -1463,10 +1322,10 @@ for(c in nc){
   for(r in rate){
     print(paste(c,"characters for rate", r))
     print("Mean for set rate: ")
-    print(mean(filter(concatDFAll, numCharacters == c, setRate == r)$SPR))
+    print(mean(filter(concatDFAll, numCharacters == c, setRate == r, propConflicting ==0)$SPR))
     print("Mean for var rate: ")
-    print(mean(filter(concatDFAll, numCharacters == c, varRateExpectation == r)$SPR))
-    if(mean(filter(concatDFAll, numCharacters == c, varRateExpectation == r)$SPR) < mean(filter(concatDFAll, numCharacters == c, setRate == r, propConflicting ==0)$SPR)){
+    print(mean(filter(concatDFAll, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR))
+    if(mean(filter(concatDFAll, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR) < mean(filter(concatDFAll, numCharacters == c, setRate == r, propConflicting ==0)$SPR)){
       varRatesLG <- FALSE
     }
     
@@ -1475,3 +1334,80 @@ for(c in nc){
   }
 }
 
+
+nc <- unique(concatDFPC1PC2$numCharacters)
+pc <- unique(concatDFPC1PC2$propConflicting)
+meanDiff <- c()
+for(c in nc){
+  for(p in 2:length(pc)){
+    print(paste(c,"characters"))
+    print(paste("Mean for pc:", pc[p]))
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p])$SPR))
+    print(paste("Mean for pc: ", pc[p-1]))
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p-1])$SPR))
+    
+    print(paste("p =", wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p])$SPR, filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p-1])$SPR)$p.value))
+    print("------------------------------")
+  }
+}
+
+nc <- unique(concatDFAll$numCharacters)
+pc <- unique(concatDFAll$propConflicting)
+meanDiff <- c()
+for(c in nc){
+  for(p in 2:length(pc)){
+    print(paste(c,"characters"))
+    print(paste("Mean for pc:", pc[p]))
+    print(mean(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p])$SPR))
+    print(paste("Mean for pc: ", pc[p-1]))
+    print(mean(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p-1])$SPR))
+    
+    print(paste("p =", wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p])$SPR, filter(concatDFAll, numCharacters == c, propConflicting ==pc[p-1])$SPR)$p.value))
+    print("------------------------------")
+  }
+}
+
+
+nc <- unique(concatDFPC1PC2$numCharacters)
+pc <- unique(concatDFPC1PC2$propConflicting)
+meanDiff <- c()
+for(c in nc){
+  for(p in 2:length(pc)){
+    print(paste(c,"characters"))
+    print(paste("Mean for pc:", pc[p]))
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p])$RF))
+    print(paste("Mean for pc: ", pc[p-1]))
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p-1])$RF))
+    
+    print(paste("p =", wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p])$RF, filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p-1])$RF)$p.value))
+    print("------------------------------")
+  }
+}
+
+nc <- unique(concatDFAll$numCharacters)
+pc <- unique(concatDFAll$propConflicting)
+meanDiff <- c()
+for(c in nc){
+  for(p in 2:length(pc)){
+    print(paste(c,"characters"))
+    print(paste("Mean for pc:", pc[p]))
+    print(mean(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p])$RF))
+    print(paste("Mean for pc: ", pc[p-1]))
+    print(mean(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p-1])$RF))
+    
+    print(paste("p =", wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p])$RF, filter(concatDFAll, numCharacters == c, propConflicting ==pc[p-1])$RF)$p.value))
+    print("------------------------------")
+  }
+}
+
+nc <- unique(concatDFPC1PC2$numCharacters)
+for(c in nc){
+  print(paste("Num trees identical for char", c))
+  print(nrow(filter(concatDFPC1PC2, RF==0, numCharacters == c)))
+}
+
+nc <- unique(concatDFAll$numCharacters)
+for(c in nc){
+  print(paste("Num trees identical for char", c))
+  print(nrow(filter(concatDFAll, RF==0, numCharacters == c)))
+}
