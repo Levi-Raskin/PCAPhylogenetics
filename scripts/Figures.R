@@ -435,3 +435,10 @@ p3 <- p1 / p2
 p3
 
 ggsave(paste(output, "varRateSetRateConflictingFigurePC1PC2.svg", sep = ""), p3, width = 10, height = 10)
+
+
+# Figure: baseline tree and pca tree --------------------------------------
+
+tree <- phyloList[[1]]
+continuousData <- read.csv("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree1NumChar50SetRate0.1PropConflicting0Dataset100.csv")
+

@@ -17,7 +17,7 @@ rSPRFunc <- function(tree1, tree2){
     paste(getwd(), 
           "/rSPR/rspr -pairwise -unrooted -no-symmetric-pairwise < ",
           getwd(), 
-          "/rSPR/res.nwk", sep = "")
+          "/rSPR/res.nwk", sep = "") 
     , intern = T)
   nums <- sub("^[^,]*,\\s*([0-9]+)\"?$", "\\1", res[[1]])
   return(as.integer(nums))
@@ -48,7 +48,7 @@ for(i in 1:nrow(treeSubset)){
 
 # Parameters --------------------------------------------------------------
 
-numDatasets <- 100
+numDatasets <- 1:99
 numCharacters <- c(10, 100, 250)
 setRate <- c(0.1, 1, 10)
 proportionConflicting <- c(0, 0.1, 0.25, 0.5) #proportion of characters that exhibit conflicting phylogenetic signal
@@ -976,6 +976,8 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 
 
 # LDDMM results -----------------------------------------------------------
+library(tictoc)
+library(data.table)
 
 analysisFunction <- function(lddmmFile){
   tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
@@ -993,7 +995,7 @@ analysisFunction <- function(lddmmFile){
   cn[1] <- "label"
   cn[2] <- "lm"
   colnames(landmarks) <- cn
-  
+
   pcaMat <- matrix(data = NA, nrow = length(unique(landmarks$label)), ncol = dimension * 10) #currently onyl 10 lms
   rownames(pcaMat) = unique(landmarks$label)
   for(i in unique(landmarks$label)){
@@ -1004,22 +1006,44 @@ analysisFunction <- function(lddmmFile){
     }
   }
   pca <- prcomp(pcaMat)
+
   pcDistMat<- dist(pca$x[,1:2])
   njTree <- nj(pcDistMat)
   unrootedTree <- unroot(tree)
   unrootedNJTree <- unroot(njTree)
   
+  ### this is the expensive step
   sprd <- rSPRFunc(unrootedNJTree, unrootedTree)
   
-  resMat <- c(dist.topo(unrootedNJTree, unrootedTree), sprd, sprd / Ntip(mast(unrootedNJTree, unrootedTree)),numLandmarks, dimension, alpha)
-  names(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
+  resMat = as.data.frame(matrix(data = NA, nrow = 1, ncol = 6))
+  colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
+  resMat[1,] <- c(dist.topo(unrootedNJTree, unrootedTree), sprd, sprd / Ntip(mast(unrootedNJTree, unrootedTree)),numLandmarks, dimension, alpha)
+  resMat <- as.data.table(resMat)
+  fwrite(resMat, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/", regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE)), ".csv", sep = ""))
   
   return(resMat)
 }
 
 lddmmFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes",full.names = T)
+doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances")
 
-res <- pbapply::pblapply(lddmmFiles, FUN = analysisFunction)
+#prune already analyzed lddmm files
+pruneFunc <- function(lddmmFile){
+  tag <- regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE))
+  tag <- paste(tag, ".csv", sep = "")
+  
+  if(tag %in% doneFiles){
+    
+  }else{
+    return(lddmmFile)
+  }
+  
+}
+
+lddmmFilesPruned <- parallel::mclapply(lddmmFiles, pruneFunc, mc.cores = 4)
+lddmmFilesPruned <- unlist(lddmmFilesPruned)
+
+res <- pbapply::pblapply(lddmmFilesPruned, FUN = analysisFunction)
 
 resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
 for(i in 1:length(res)){
