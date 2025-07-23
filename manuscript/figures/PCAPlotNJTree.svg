@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024.99 576">
+  <!-- Generator: Adobe Illustrator 29.6.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 9)  -->
+  <defs>
+    <style>
+      .st0, .st1, .st2, .st3, .st4, .st5, .st6, .st7, .st8, .st9, .st10, .st11, .st12, .st13, .st14, .st15, .st16, .st17, .st18, .st19 {
+        isolation: isolate;
+      }
+
+      .st0, .st2, .st3, .st4, .st5, .st6, .st7, .st8, .st9, .st10, .st11, .st12, .st13, .st15, .st16, .st17, .st18, .st19 {
+        font-style: italic;
+      }
+
+      .st0, .st2, .st3, .st4, .st5, .st6, .st7, .st8, .st9, .st10, .st12, .st13, .st15, .st16, .st17, .st18, .st19 {
+        font-family: Arial-ItalicMT, Arial;
+      }
+
+      .st0, .st2, .st3, .st4, .st5, .st7, .st8, .st9, .st10, .st12, .st13, .st15, .st16, .st17, .st18, .st19 {
+        font-size: 8.54px;
+      }
+
+      .st0, .st20 {
+        fill: #ffbba2;
+      }
+
+      .st21 {
+        stroke: #b1d4ff;
+      }
+
+      .st21, .st22, .st23, .st24, .st25, .st26, .st27, .st28, .st29, .st30, .st31, .st32, .st33, .st34, .st35, .st36, .st37, .st38, .st39, .st20 {
+        stroke-linecap: round;
+      }
+
+      .st21, .st22, .st23, .st24, .st25, .st26, .st27, .st28, .st29, .st30, .st32, .st33, .st34, .st35, .st37, .st38, .st39, .st40, .st20 {
+        stroke-linejoin: round;
+      }
+
+      .st21, .st22, .st23, .st24, .st25, .st26, .st27, .st28, .st29, .st30, .st32, .st33, .st34, .st35, .st37, .st39, .st20 {
+        stroke-width: .71px;
+      }
+
+      .st21, .st12 {
+        fill: #b1d4ff;
+      }
+
+      .st1 {
+        font-size: 11px;
+      }
+
+      .st1, .st14 {
+        font-family: ArialMT, Arial;
+      }
+
+      .st2, .st35 {
+        fill: #64a0da;
+      }
+
+      .st3, .st33 {
+        fill: #95f293;
+      }
+
+      .st4, .st39 {
+        fill: #e41a1c;
+      }
+
+      .st22 {
+        stroke: #ffd7ca;
+      }
+
+      .st22, .st16 {
+        fill: #ffd7ca;
+      }
+
+      .st23 {
+        stroke: #ff9e71;
+      }
+
+      .st23, .st13 {
+        fill: #ff9e71;
+      }
+
+      .st5, .st24 {
+        fill: #72d06f;
+      }
+
+      .st24 {
+        stroke: #72d06f;
+      }
+
+      .st25 {
+        stroke: #984ea3;
+      }
+
+      .st25, .st19 {
+        fill: #984ea3;
+      }
+
+      .st26 {
+        stroke: #4f8fc9;
+      }
+
+      .st26, .st7 {
+        fill: #4f8fc9;
+      }
+
+      .st27 {
+        stroke: #78b1ec;
+      }
+
+      .st27, .st15 {
+        fill: #78b1ec;
+      }
+
+      .st28 {
+        stroke: #777;
+      }
+
+      .st28, .st9 {
+        fill: #777;
+      }
+
+      .st29 {
+        fill: #785ef0;
+      }
+
+      .st29, .st31, .st36, .st38 {
+        stroke: #000;
+      }
+
+      .st30 {
+        stroke: #83e181;
+      }
+
+      .st30, .st17 {
+        fill: #83e181;
+      }
+
+      .st31, .st38, .st40 {
+        fill: none;
+      }
+
+      .st6, .st14 {
+        font-size: 8.8px;
+      }
+
+      .st32 {
+        stroke: #f781bf;
+      }
+
+      .st32, .st10 {
+        fill: #f781bf;
+      }
+
+      .st8, .st34 {
+        fill: #60bf5d;
+      }
+
+      .st33 {
+        stroke: #95f293;
+      }
+
+      .st11 {
+        font-family: Arial-BoldItalicMT, Arial;
+        font-size: 11.04px;
+        font-weight: 700;
+      }
+
+      .st34 {
+        stroke: #60bf5d;
+      }
+
+      .st35 {
+        stroke: #64a0da;
+      }
+
+      .st37 {
+        stroke: #8cc3fe;
+      }
+
+      .st37, .st18 {
+        fill: #8cc3fe;
+      }
+
+      .st14 {
+        fill: #4d4d4d;
+      }
+
+      .st38, .st40 {
+        stroke-width: 1.07px;
+      }
+
+      .st39 {
+        stroke: #e41a1c;
+      }
+
+      .st40 {
+        stroke: #ebebeb;
+      }
+
+      .st41 {
+        display: none;
+      }
+
+      .st20 {
+        stroke: #ffbba2;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1">
+    <g>
+      <line class="st40" x1="468.69" y1="391.16" x2="863.01" y2="391.16"/>
+      <line class="st40" x1="468.69" y1="209.96" x2="863.01" y2="209.96"/>
+      <line class="st40" x1="468.69" y1="28.75" x2="863.01" y2="28.75"/>
+      <line class="st40" x1="510.36" y1="544.98" x2="510.36" y2="5.96"/>
+      <line class="st40" x1="630.92" y1="544.98" x2="630.92" y2="5.96"/>
+      <line class="st40" x1="751.48" y1="544.98" x2="751.48" y2="5.96"/>
+    </g>
+    <g>
+      <text class="st14" transform="translate(456.17 393.83)"><tspan x="0" y="0">-1</tspan></text>
+      <text class="st14" transform="translate(459.1 212.63)"><tspan x="0" y="0">0</tspan></text>
+      <text class="st14" transform="translate(459.1 31.42)"><tspan x="0" y="0">1</tspan></text>
+      <text class="st14" transform="translate(506.68 555.74)"><tspan x="0" y="0">-1</tspan></text>
+      <text class="st14" transform="translate(628.7 555.74)"><tspan x="0" y="0">0</tspan></text>
+      <text class="st14" transform="translate(749.26 555.74)"><tspan x="0" y="0">1</tspan></text>
+      <text class="st1" transform="translate(655.38 568.2)"><tspan x="0" y="0">PC1</tspan></text>
+      <text class="st1" transform="translate(451.12 285.69) rotate(-90)"><tspan x="0" y="0">PC2</tspan></text>
+      <text class="st1" transform="translate(883.56 107.94)"><tspan x="0" y="0">Species</tspan></text>
+      <circle class="st39" cx="892.2" cy="123.22" r="3.56"/>
+      <text class="st4" transform="translate(889.83 126.28)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st26" cx="892.2" cy="140.5" r="3.56"/>
+      <text class="st7" transform="translate(889.83 143.56)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st27" cx="892.2" cy="157.78" r="3.56"/>
+      <text class="st15" transform="translate(889.83 160.84)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st21" cx="892.2" cy="175.06" r="3.56"/>
+      <text class="st12" transform="translate(889.83 178.12)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st37" cx="892.2" cy="192.34" r="3.56"/>
+      <text class="st18" transform="translate(889.83 195.4)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st35" cx="892.2" cy="209.62" r="3.56"/>
+      <text class="st2" transform="translate(889.83 212.68)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st32" cx="892.2" cy="226.9" r="3.56"/>
+      <text class="st10" transform="translate(889.83 229.96)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st32" cx="892.2" cy="244.18" r="3.56"/>
+      <text class="st10" transform="translate(889.83 247.24)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st24" cx="892.2" cy="261.46" r="3.56"/>
+      <text class="st5" transform="translate(889.83 264.52)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st30" cx="892.2" cy="278.74" r="3.56"/>
+      <text class="st17" transform="translate(889.83 281.8)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st33" cx="892.2" cy="296.02" r="3.56"/>
+      <text class="st3" transform="translate(889.83 299.08)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st34" cx="891.3" cy="311.52" r="3.56"/>
+      <text class="st8" transform="translate(888.92 314.58)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st32" cx="891.3" cy="328.8" r="3.56"/>
+      <text class="st10" transform="translate(888.92 331.86)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st25" cx="891.3" cy="346.08" r="3.56"/>
+      <text class="st19" transform="translate(888.92 349.14)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st32" cx="891.3" cy="363.36" r="3.56"/>
+      <text class="st10" transform="translate(888.92 366.42)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st32" cx="891.3" cy="380.64" r="3.56"/>
+      <text class="st10" transform="translate(888.92 383.7)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st22" cx="891.3" cy="397.92" r="3.56"/>
+      <text class="st16" transform="translate(888.92 400.98)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st23" cx="891.3" cy="415.2" r="3.56"/>
+      <text class="st13" transform="translate(888.92 418.26)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st20" cx="891.3" cy="432.48" r="3.56"/>
+      <text class="st0" transform="translate(888.92 435.54)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st32" cx="891.3" cy="449.76" r="3.56"/>
+      <text class="st10" transform="translate(888.92 452.82)"><tspan x="0" y="0">a</tspan></text>
+      <circle class="st28" cx="891.3" cy="467.04" r="3.56"/>
+      <text class="st9" transform="translate(888.92 470.1)"><tspan x="0" y="0">a</tspan></text>
+      <text class="st6" transform="translate(906.32 126.37)"><tspan x="0" y="0">Ardipithecus ramidus</tspan></text>
+      <text class="st6" transform="translate(906.32 143.65)"><tspan x="0" y="0">Australopithecus afarensis</tspan></text>
+      <text class="st6" transform="translate(906.32 160.93)"><tspan x="0" y="0">Australopithecus africanus</tspan></text>
+      <text class="st6" transform="translate(906.32 178.21)"><tspan x="0" y="0">Australopithecus anamensis</tspan></text>
+      <text class="st6" transform="translate(906.32 195.49)"><tspan x="0" y="0">Australopithecus garhi</tspan></text>
+      <text class="st6" transform="translate(906.32 212.77)"><tspan x="0" y="0">Australopithecus sediba</tspan></text>
+      <text class="st6" transform="translate(906.32 230.05)"><tspan x="0" y="0">Colobus guereza</tspan></text>
+      <text class="st6" transform="translate(906.32 247.33)"><tspan x="0" y="0">Gorilla gorilla</tspan></text>
+      <text class="st6" transform="translate(906.32 264.61)"><tspan x="0" y="0">Homo ergaster</tspan></text>
+      <text class="st6" transform="translate(906.32 281.89)"><tspan x="0" y="0">Homo habilis</tspan></text>
+      <text class="st6" transform="translate(906.32 299.17)"><tspan x="0" y="0">Homo rudolfensis</tspan></text>
+      <text class="st6" transform="translate(905.42 314.67)"><tspan x="0" y="0">Homo sapiens</tspan></text>
+      <text class="st6" transform="translate(905.42 331.95)"><tspan x="0" y="0">Hylobates</tspan></text>
+      <text class="st6" transform="translate(905.42 349.23)"><tspan x="0" y="0">Kenyanthropus platyops</tspan></text>
+      <text class="st6" transform="translate(905.42 366.51)"><tspan x="0" y="0">Pan troglodytes</tspan></text>
+      <text class="st6" transform="translate(905.42 383.79)"><tspan x="0" y="0">Papio</tspan></text>
+      <text class="st6" transform="translate(905.42 401.07)"><tspan x="0" y="0">Paranthropus aethiopicus</tspan></text>
+      <text class="st6" transform="translate(905.42 418.35)"><tspan x="0" y="0">Paranthropus boisei</tspan></text>
+      <text class="st6" transform="translate(905.42 435.63)"><tspan x="0" y="0">Paranthropus robustus</tspan></text>
+      <text class="st6" transform="translate(905.42 452.91)"><tspan x="0" y="0">Pongo pygmaeus</tspan></text>
+      <text class="st6" transform="translate(905.42 470.19)"><tspan x="0" y="0">Sahelanthropus tchadensis</tspan></text>
+    </g>
+    <g>
+      <path class="st31" d="M571.25,100.1l-19.79,92.42,19.79-92.42Z"/>
+      <line class="st36" x1="836.57" y1="29.76" x2="803.78" y2="57.78"/>
+      <line class="st31" x1="845.58" y1="54.41" x2="803.78" y2="57.78"/>
+      <line class="st31" x1="777.54" y1="71.87" x2="794.1" y2="81.37"/>
+      <line class="st31" x1="803.78" y1="57.78" x2="777.54" y2="71.87"/>
+      <line class="st31" x1="720.61" y1="168.57" x2="706.54" y2="152.17"/>
+      <line class="st31" x1="681.11" y1="198.56" x2="691.24" y2="191.86"/>
+      <line class="st31" x1="683.53" y1="210.59" x2="691.24" y2="191.86"/>
+      <line class="st31" x1="682.79" y1="179.04" x2="691.24" y2="191.86"/>
+      <line class="st31" x1="674.74" y1="214.08" x2="665.23" y2="198.89"/>
+      <line class="st31" x1="665.59" y1="249.91" x2="648.55" y2="217.77"/>
+      <line class="st31" x1="677.56" y1="506.74" x2="689.99" y2="486.87"/>
+      <line class="st31" x1="682.32" y1="519.87" x2="689.99" y2="486.87"/>
+      <line class="st31" x1="658.91" y1="503.81" x2="685.34" y2="464.31"/>
+      <line class="st31" x1="689.99" y1="486.87" x2="637.19" y2="230.61"/>
+      <line class="st31" x1="637.19" y1="230.61" x2="576.53" y2="211.87"/>
+      <line class="st31" x1="589.65" y1="240.39" x2="594.15" y2="217.77"/>
+      <line class="st31" x1="573.43" y1="261.76" x2="584.25" y2="214.26"/>
+      <line class="st31" x1="599.44" y1="202.55" x2="576.53" y2="211.87"/>
+      <path class="st31" d="M576.53,211.87"/>
+      <line class="st31" x1="498.54" y1="165.73" x2="504.69" y2="166.25"/>
+      <line class="st31" x1="504.17" y1="177.77" x2="505.79" y2="157.26"/>
+      <path class="st31" d="M506.2,151.12"/>
+      <path class="st31" d="M493.75,147.96"/>
+      <line class="st31" x1="506.77" y1="139.61" x2="493.75" y2="147.96"/>
+      <line class="st31" x1="487.85" y1="89.35" x2="493.75" y2="147.96"/>
+      <line class="st31" x1="486.78" y1="141.2" x2="492.94" y2="139.91"/>
+      <line class="st31" x1="637.19" y1="230.61" x2="777.54" y2="71.87"/>
+      <line class="st31" x1="493.75" y1="147.96" x2="576.53" y2="211.87"/>
+      <line class="st31" x1="514.11" y1="145.85" x2="511.17" y2="161.41"/>
+    </g>
+    <g>
+      <path class="st40" d="M863.24,390.68"/>
+      <path class="st40" d="M468.92,390.68"/>
+      <path class="st40" d="M863.24,209.48"/>
+      <path class="st40" d="M468.92,209.48"/>
+      <path class="st40" d="M863.24,28.27"/>
+      <path class="st40" d="M468.92,28.27"/>
+      <path class="st40" d="M510.59,5.48"/>
+      <path class="st40" d="M510.59,544.5"/>
+      <path class="st40" d="M631.15,5.48"/>
+      <path class="st40" d="M631.15,544.5"/>
+      <path class="st40" d="M751.71,5.48"/>
+      <path class="st40" d="M751.71,544.5"/>
+      <circle class="st39" cx="571.64" cy="100.03" r="3.56"/>
+      <circle class="st26" cx="589.8" cy="240.02" r="3.56"/>
+      <circle class="st35" cx="720.61" cy="168.25" r="3.56"/>
+      <circle class="st34" cx="836.56" cy="29.98" r="3.56"/>
+      <circle class="st24" cx="845.32" cy="54.26" r="3.56"/>
+      <circle class="st30" cx="794.06" cy="81.43" r="3.56"/>
+      <circle class="st33" cx="674.65" cy="213.84" r="3.56"/>
+      <circle class="st27" cx="681.29" cy="198.39" r="3.56"/>
+      <circle class="st25" cx="684.11" cy="210.38" r="3.56"/>
+      <circle class="st23" cx="682.45" cy="520" r="3.56"/>
+      <circle class="st20" cx="677.65" cy="506.57" r="3.56"/>
+      <circle class="st22" cx="659.18" cy="503.57" r="3.56"/>
+      <circle class="st37" cx="665.55" cy="249.65" r="3.56"/>
+      <circle class="st21" cx="599.51" cy="202.56" r="3.56"/>
+      <circle class="st28" cx="573.47" cy="261.42" r="3.56"/>
+      <circle class="st32" cx="506.67" cy="139.69" r="3.56"/>
+      <circle class="st32" cx="514.27" cy="145.75" r="3.56"/>
+      <circle class="st32" cx="486.84" cy="141.16" r="3.56"/>
+      <circle class="st32" cx="504.21" cy="177.15" r="3.56"/>
+      <circle class="st32" cx="498.45" cy="165.69" r="3.56"/>
+      <text class="st4" transform="translate(576.53 103.02)"><tspan x="0" y="0">Ar. ramidus</tspan></text>
+      <text class="st7" transform="translate(583.27 250.79)"><tspan x="0" y="0">Au. afarensis</tspan></text>
+      <text class="st2" transform="translate(726.31 170.8)"><tspan x="0" y="0">Au. sediba</tspan></text>
+      <text class="st8" transform="translate(817.2 22.63)"><tspan x="0" y="0">H. sapiens</tspan></text>
+      <text class="st5" transform="translate(816.31 63.79)"><tspan x="0" y="0">H. ergaster</tspan></text>
+      <text class="st17" transform="translate(799.82 84.32)"><tspan x="0" y="0">H. habilis</tspan></text>
+      <text class="st3" transform="translate(678.01 222.64)"><tspan x="0" y="0">H. rudolfensis</tspan></text>
+      <text class="st15" transform="translate(689.99 201.22)"><tspan x="0" y="0">Au. africanus</tspan></text>
+      <text class="st19" transform="translate(688.5 211.87)"><tspan x="0" y="0">K. platyops</tspan></text>
+      <text class="st13" transform="translate(687.38 522.82)"><tspan x="0" y="0">P. boisei</tspan></text>
+      <text class="st0" transform="translate(633.62 515.37)"><tspan x="0" y="0">P. robustus</tspan></text>
+      <text class="st16" transform="translate(601.59 505.17)"><tspan x="0" y="0">P. aethiopicus</tspan></text>
+      <text class="st18" transform="translate(669.99 252.64)"><tspan x="0" y="0">Au. garhi</tspan></text>
+      <text class="st12" transform="translate(594.15 198.27)"><tspan x="0" y="0">Au. anamensis</tspan></text>
+      <text class="st9" transform="translate(578.84 264.88)"><tspan x="0" y="0">S. tchadensis</tspan></text>
+      <text class="st10" transform="translate(502.52 134.67)"><tspan x="0" y="0">Pan troglodytes</tspan></text>
+      <text class="st10" transform="translate(518.01 147.96)"><tspan x="0" y="0">G. gorilla</tspan></text>
+      <text class="st10" transform="translate(492.94 91.29)"><tspan x="0" y="0">Po. pygmaeus</tspan></text>
+      <text class="st10" transform="translate(459.47 143.79)"><tspan x="0" y="0">Papio</tspan></text>
+      <text class="st10" transform="translate(461.92 179.92)"><tspan x="0" y="0">Hylobates</tspan></text>
+      <circle class="st32" cx="487.9" cy="89.22" r="3.56"/>
+      <text class="st10" transform="translate(450.97 167.82)"><tspan x="0" y="0">C. guereza</tspan></text>
+    </g>
+    <g>
+      <line class="st38" x1="114" y1="388.69" x2="125.59" y2="388.69"/>
+      <line class="st38" x1="135.45" y1="309.12" x2="156.02" y2="309.12"/>
+      <line class="st38" x1="187.83" y1="96.93" x2="196.94" y2="96.93"/>
+      <line class="st38" x1="243.31" y1="17.36" x2="258.82" y2="17.36"/>
+      <line class="st38" x1="243.31" y1="43.89" x2="247.37" y2="43.89"/>
+      <line class="st38" x1="217.41" y1="70.41" x2="227.72" y2="70.41"/>
+      <line class="st38" x1="188.16" y1="149.98" x2="213.99" y2="149.98"/>
+      <line class="st38" x1="188.16" y1="123.46" x2="213.59" y2="123.46"/>
+      <line class="st38" x1="180.49" y1="176.51" x2="184.8" y2="176.51"/>
+      <line class="st38" x1="268.4" y1="229.55" x2="286.41" y2="229.55"/>
+      <line class="st38" x1="268.4" y1="203.03" x2="306.64" y2="203.03"/>
+      <line class="st38" x1="242.86" y1="256.08" x2="244.12" y2="256.08"/>
+      <line class="st38" x1="170.36" y1="282.6" x2="179.63" y2="282.6"/>
+      <line class="st38" x1="128.32" y1="335.65" x2="138.92" y2="335.65"/>
+      <line class="st38" x1="125.26" y1="362.17" x2="155.46" y2="362.17"/>
+      <line class="st38" x1="94.47" y1="415.22" x2="102.04" y2="415.22"/>
+      <line class="st38" x1="84.03" y1="441.74" x2="94.42" y2="441.74"/>
+      <line class="st38" x1="62.96" y1="468.27" x2="103.18" y2="468.27"/>
+      <line class="st38" x1="43.15" y1="494.79" x2="45.15" y2="494.79"/>
+      <line class="st38" x1="23.12" y1="521.31" x2="44.55" y2="521.31"/>
+      <line class="st38" x1="23.12" y1="547.84" x2="30.54" y2="547.84"/>
+      <line class="st38" x1="23.12" y1="521.25" x2="23.12" y2="521.25"/>
+      <line class="st38" x1="23.12" y1="494.65" x2="23.12" y2="494.65"/>
+      <line class="st38" x1="23.12" y1="468" x2="43.15" y2="468"/>
+      <line class="st38" x1="43.15" y1="441.2" x2="62.96" y2="441.2"/>
+      <line class="st38" x1="62.96" y1="414.14" x2="84.03" y2="414.14"/>
+      <line class="st38" x1="84.03" y1="386.54" x2="94.47" y2="386.54"/>
+      <line class="st38" x1="94.47" y1="357.87" x2="114" y2="357.87"/>
+      <line class="st38" x1="114" y1="327.05" x2="125.26" y2="327.05"/>
+      <line class="st38" x1="125.26" y1="291.92" x2="128.32" y2="291.92"/>
+      <line class="st38" x1="128.32" y1="248.2" x2="135.45" y2="248.2"/>
+      <line class="st38" x1="135.45" y1="187.28" x2="163.88" y2="187.28"/>
+      <line class="st38" x1="163.88" y1="115.17" x2="178.33" y2="115.17"/>
+      <line class="st38" x1="178.33" y1="73.73" x2="187.83" y2="73.73"/>
+      <line class="st38" x1="187.83" y1="50.52" x2="217.41" y2="50.52"/>
+      <line class="st38" x1="217.41" y1="30.63" x2="243.31" y2="30.63"/>
+      <line class="st38" x1="178.33" y1="156.61" x2="180.49" y2="156.61"/>
+      <line class="st38" x1="180.49" y1="136.72" x2="188.16" y2="136.72"/>
+      <line class="st38" x1="163.88" y1="259.39" x2="170.36" y2="259.39"/>
+      <line class="st38" x1="170.36" y1="236.18" x2="242.86" y2="236.18"/>
+      <line class="st38" x1="242.86" y1="216.29" x2="268.4" y2="216.29"/>
+      <line class="st38" x1="114" y1="357.87" x2="114" y2="388.69"/>
+      <line class="st38" x1="135.45" y1="248.2" x2="135.45" y2="309.12"/>
+      <line class="st38" x1="187.83" y1="73.73" x2="187.83" y2="96.93"/>
+      <line class="st38" x1="243.31" y1="30.63" x2="243.31" y2="17.36"/>
+      <line class="st38" x1="243.31" y1="30.63" x2="243.31" y2="43.89"/>
+      <line class="st38" x1="217.41" y1="50.52" x2="217.41" y2="70.41"/>
+      <line class="st38" x1="188.16" y1="136.72" x2="188.16" y2="149.98"/>
+      <line class="st38" x1="188.16" y1="136.72" x2="188.16" y2="123.46"/>
+      <line class="st38" x1="180.49" y1="156.61" x2="180.49" y2="176.51"/>
+      <line class="st38" x1="268.4" y1="216.29" x2="268.4" y2="229.55"/>
+      <line class="st38" x1="268.4" y1="216.29" x2="268.4" y2="203.03"/>
+      <line class="st38" x1="242.86" y1="236.18" x2="242.86" y2="256.08"/>
+      <line class="st38" x1="170.36" y1="259.39" x2="170.36" y2="282.6"/>
+      <line class="st38" x1="128.32" y1="291.92" x2="128.32" y2="335.65"/>
+      <line class="st38" x1="125.26" y1="327.05" x2="125.26" y2="362.17"/>
+      <line class="st38" x1="94.47" y1="386.54" x2="94.47" y2="415.22"/>
+      <line class="st38" x1="84.03" y1="414.14" x2="84.03" y2="441.74"/>
+      <line class="st38" x1="62.96" y1="441.2" x2="62.96" y2="468.27"/>
+      <line class="st38" x1="43.15" y1="468" x2="43.15" y2="494.79"/>
+      <line class="st38" x1="23.12" y1="494.65" x2="23.12" y2="521.31"/>
+      <line class="st38" x1="23.12" y1="521.25" x2="23.12" y2="547.84"/>
+      <line class="st38" x1="23.12" y1="521.25" x2="23.12" y2="521.25"/>
+      <line class="st38" x1="23.12" y1="521.25" x2="23.12" y2="494.65"/>
+      <line class="st38" x1="23.12" y1="494.65" x2="23.12" y2="468"/>
+      <line class="st38" x1="43.15" y1="468" x2="43.15" y2="441.2"/>
+      <line class="st38" x1="62.96" y1="441.2" x2="62.96" y2="414.14"/>
+      <line class="st38" x1="84.03" y1="414.14" x2="84.03" y2="386.54"/>
+      <line class="st38" x1="94.47" y1="386.54" x2="94.47" y2="357.87"/>
+      <line class="st38" x1="114" y1="357.87" x2="114" y2="327.05"/>
+      <line class="st38" x1="125.26" y1="327.05" x2="125.26" y2="291.92"/>
+      <line class="st38" x1="128.32" y1="291.92" x2="128.32" y2="248.2"/>
+      <line class="st38" x1="135.45" y1="248.2" x2="135.45" y2="187.28"/>
+      <line class="st38" x1="163.88" y1="187.28" x2="163.88" y2="115.17"/>
+      <line class="st38" x1="178.33" y1="115.17" x2="178.33" y2="73.73"/>
+      <line class="st38" x1="187.83" y1="73.73" x2="187.83" y2="50.52"/>
+      <line class="st38" x1="217.41" y1="50.52" x2="217.41" y2="30.63"/>
+      <line class="st38" x1="178.33" y1="115.17" x2="178.33" y2="156.61"/>
+      <line class="st38" x1="180.49" y1="156.61" x2="180.49" y2="136.72"/>
+      <line class="st38" x1="163.88" y1="187.28" x2="163.88" y2="259.39"/>
+      <line class="st38" x1="170.36" y1="259.39" x2="170.36" y2="236.18"/>
+      <line class="st38" x1="242.86" y1="236.18" x2="242.86" y2="216.29"/>
+      <text class="st11" transform="translate(127.01 392.64)"><tspan x="0" y="0">Ardipithecus ramidus</tspan></text>
+      <text class="st11" transform="translate(157.44 313.07)"><tspan x="0" y="0">Australopithecus afarensis</tspan></text>
+      <text class="st11" transform="translate(198.36 100.88)"><tspan x="0" y="0">Australopithecus sediba</tspan></text>
+      <text class="st11" transform="translate(260.23 21.31)"><tspan x="0" y="0">Homo sapiens</tspan></text>
+      <text class="st11" transform="translate(248.79 47.84)"><tspan x="0" y="0">Homo ergaster</tspan></text>
+      <text class="st11" transform="translate(229.14 74.36)"><tspan x="0" y="0">Homo habilis</tspan></text>
+      <text class="st11" transform="translate(215.41 153.93)"><tspan x="0" y="0">Homo rudolfensis</tspan></text>
+      <text class="st11" transform="translate(215 127.41)"><tspan x="0" y="0">Australopithecus africanus</tspan></text>
+      <text class="st11" transform="translate(186.22 180.45)"><tspan x="0" y="0">Kenyanthropus platyops</tspan></text>
+      <text class="st11" transform="translate(287.83 233.5)"><tspan x="0" y="0">Paranthropus boisei</tspan></text>
+      <text class="st11" transform="translate(308.06 206.98)"><tspan x="0" y="0">Paranthropus robustus</tspan></text>
+      <text class="st11" transform="translate(245.54 260.03)"><tspan x="0" y="0">Paranthropus aethiopicus</tspan></text>
+      <text class="st11" transform="translate(181.05 286.55)"><tspan x="0" y="0">Australopithecus garhi</tspan></text>
+      <text class="st11" transform="translate(140.34 339.6)"><tspan x="0" y="0">Australopithecus anamensis</tspan></text>
+      <text class="st11" transform="translate(156.87 366.12)"><tspan x="0" y="0">Sahelanthropus tchadensis</tspan></text>
+      <text class="st11" transform="translate(103.46 419.17)"><tspan x="0" y="0">Pan troglodytes</tspan></text>
+      <text class="st11" transform="translate(95.84 445.69)"><tspan x="0" y="0">Gorilla gorilla</tspan></text>
+      <text class="st11" transform="translate(104.59 472.21)"><tspan x="0" y="0">Pongo pygmaeus</tspan></text>
+      <text class="st11" transform="translate(46.57 498.74)"><tspan x="0" y="0">Papio</tspan></text>
+      <text class="st11" transform="translate(45.97 525.26)"><tspan x="0" y="0">Hylobates</tspan></text>
+      <text class="st11" transform="translate(31.95 551.79)"><tspan x="0" y="0">Colobus guereza</tspan></text>
+    </g>
+    <polygon class="st29" points="188.16 142.72 194.16 136.72 188.16 130.72 182.15 136.72 188.16 142.72"/>
+    <polygon class="st29" points="170.36 265.39 176.36 259.39 170.36 253.39 164.35 259.39 170.36 265.39"/>
+    <polygon class="st29" points="128.32 297.92 134.32 291.92 128.32 285.92 122.31 291.92 128.32 297.92"/>
+    <polygon class="st29" points="94.42 392.54 100.42 386.54 94.42 380.54 88.41 386.54 94.42 392.54"/>
+    <polygon class="st29" points="62.96 447.36 68.96 441.36 62.96 435.36 56.95 441.36 62.96 447.36"/>
+  </g>
+  <g id="Layer_2" class="st41">
+    <line class="st36" x1="836.51" y1="30.47" x2="804.25" y2="59.05"/>
+    <line class="st31" x1="845.46" y1="55.32" x2="804.25" y2="59.05"/>
+    <line class="st31" x1="778.01" y1="73.14" x2="794.04" y2="81.76"/>
+    <line class="st31" x1="804.25" y1="59.05" x2="778.01" y2="73.14"/>
+    <line class="st31" x1="720.29" y1="168.25" x2="707.01" y2="153.44"/>
+    <line class="st31" x1="681.58" y1="197.88" x2="691.71" y2="193.13"/>
+    <line class="st31" x1="683.99" y1="210.18" x2="691.71" y2="193.13"/>
+    <line class="st31" x1="683.26" y1="180.31" x2="691.71" y2="193.13"/>
+    <line class="st31" x1="674.24" y1="213.81" x2="665.7" y2="200.16"/>
+    <line class="st31" x1="665.11" y1="250.02" x2="649.01" y2="219.04"/>
+    <line class="st31" x1="677.72" y1="506.87" x2="690.46" y2="488.14"/>
+    <line class="st31" x1="682.35" y1="519.8" x2="690.46" y2="488.14"/>
+    <line class="st31" x1="659.38" y1="503.81" x2="685.81" y2="465.58"/>
+    <line class="st31" x1="690.46" y1="488.14" x2="637.66" y2="231.88"/>
+    <line class="st31" x1="637.66" y1="231.88" x2="576.99" y2="213.14"/>
+    <line class="st31" x1="589.85" y1="239.93" x2="594.61" y2="219.04"/>
+    <line class="st31" x1="574.15" y1="261.94" x2="584.72" y2="215.53"/>
+    <line class="st31" x1="597.96" y1="202.5" x2="576.99" y2="213.14"/>
+    <path class="st31" d="M571.25,100.19l-19.32,93.6,19.32-93.6Z"/>
+    <path class="st31" d="M576.99,213.14"/>
+    <line class="st31" x1="498.44" y1="165.82" x2="505.45" y2="165.42"/>
+    <line class="st31" x1="504.05" y1="177.41" x2="506.26" y2="158.53"/>
+    <path class="st31" d="M506.67,152.39"/>
+    <path class="st31" d="M494.22,149.23"/>
+    <line class="st31" x1="506.59" y1="139.22" x2="494.22" y2="149.23"/>
+    <line class="st31" x1="487.76" y1="88.62" x2="494.22" y2="149.23"/>
+    <line class="st31" x1="486.06" y1="141.75" x2="492.7" y2="139.16"/>
+    <line class="st31" x1="637.66" y1="231.88" x2="778.01" y2="73.14"/>
+    <line class="st31" x1="494.22" y1="149.23" x2="576.99" y2="213.14"/>
+    <line class="st31" x1="514.3" y1="145.4" x2="511.64" y2="162.68"/>
+  </g>
+</svg>

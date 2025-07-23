@@ -4,12 +4,12 @@ library(dplyr)
 library(gghalves)
 library(ggnewscale)
 library(ggplot2)
+library(ggrepel)
 library(ggtree)
 library(ggstar)
 library(phangorn)
 library(phytools)
 library(plotly)
-l
 library(RColorBrewer)
 
 output <- "/Users/levir/Documents/GitHub/PCAPhylogenetics/manuscript/figures/"
@@ -460,6 +460,7 @@ p1 <- ggtree(tree)+
   xlim(NA, 5)
 p1 <- ggtree::rotate(p1, 36)
 p1
+ggsave(paste(output, "trueTreePCA.svg", sep = ""), p1, width = 8, height = 8)
 
 plotDF <- as.data.frame(pca$x)
 
@@ -472,18 +473,18 @@ shared_color_genera <- c("Colobus", "Gorilla", "Hylobates", "Papio", "Pan", "Pon
 
 # Assign base colors
 base_colors <- c(
-  Ardipithecus     = "gray30",
-  Australopithecus = "orange",
-  Homo             = "darkgreen",
-  Kenyanthropus    = "darkred",
-  Paranthropus     = "firebrick",
-  Sahelanthropus   = "mediumpurple",
-  Colobus          = "steelblue",
-  Gorilla          = "steelblue",
-  Hylobates        = "steelblue",
-  Papio            = "steelblue",
-  Pan              = "steelblue",
-  Pongo            = "steelblue"
+  Ardipithecus     = "#E41A1C",
+  Australopithecus = "#377EB8",
+  Homo             = "#4DAF4A",
+  Kenyanthropus    = "#984EA3",
+  Paranthropus     = "#FF7F00",
+  Sahelanthropus   = "#777777",
+  Colobus          = "#F781BF",
+  Gorilla          = "#F781BF",
+  Hylobates        = "#F781BF",
+  Papio            = "#F781BF",
+  Pan              = "#F781BF",
+  Pongo            = "#F781BF"
 )
 
   
@@ -495,9 +496,17 @@ taxa_df <- plotDF %>%
   ungroup()
 
 # Assign color shades by genus and shared base color
+# taxa_df$color <- mapply(function(genus, idx, n) {
+#   lighten(base_colors[[genus]], idx / (n * 1.5))  # tweak shade spread
+# }, taxa_df$genus, taxa_df$species_index, taxa_df$n_species, USE.NAMES = FALSE)
 taxa_df$color <- mapply(function(genus, idx, n) {
-  lighten(base_colors[[genus]], idx / (n * 2))  # tweak shade spread
+  if (n == 1) {
+    base_colors[[genus]]  # Keep original color
+  } else {
+    lighten(base_colors[[genus]], idx / (n * 1.5))  # Desaturate for multiple species
+  }
 }, taxa_df$genus, taxa_df$species_index, taxa_df$n_species, USE.NAMES = FALSE)
+
 
 # Create named vector for scale_color_manual
 taxon_colors <- setNames(taxa_df$color, taxa_df$taxon)
@@ -505,13 +514,17 @@ taxon_colors <- setNames(taxa_df$color, taxa_df$taxon)
 # Plot
 p2 <- ggplot(plotDF, aes(x = PC1, y = PC2, color = taxon)) +
   geom_point(size = 3) +
+  geom_text_repel(aes(label = taxon), size = 3, max.overlaps = 100, fontface = 3)+
   scale_color_manual(values = taxon_colors, name = "Species") +
   xlab("PC1") +
   ylab("PC2") +
   theme_minimal() +
   theme(
+    legend.text = element_text(face = "italic"),
     legend.position = "right",
     panel.grid.minor = element_blank()
   )
-
 p2
+
+ggsave(paste(output, "examplePCAPlot.svg", sep = ""), p2, width = 10, height = 8)
+
