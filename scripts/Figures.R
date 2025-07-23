@@ -1,9 +1,15 @@
+library(ape)
+library(colorspace)
 library(dplyr)
 library(gghalves)
 library(ggnewscale)
 library(ggplot2)
 library(ggtree)
+library(ggstar)
+library(phangorn)
+library(phytools)
 library(plotly)
+l
 library(RColorBrewer)
 
 output <- "/Users/levir/Documents/GitHub/PCAPhylogenetics/manuscript/figures/"
@@ -15,6 +21,7 @@ phyloList <- list()
 for(i in 1:nrow(treeSubset)){
   phyloList[[i]] <- ape::read.tree(text = as.character(treeSubset[i, 2]))
 }
+
 
 # Figure: LDDMM continuous traits --------------------------------------------
 
@@ -440,5 +447,71 @@ ggsave(paste(output, "varRateSetRateConflictingFigurePC1PC2.svg", sep = ""), p3,
 # Figure: baseline tree and pca tree --------------------------------------
 
 tree <- phyloList[[1]]
-continuousData <- read.csv("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree1NumChar50SetRate0.1PropConflicting0Dataset100.csv")
+datasetD <- read.csv("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree1NumChar50SetRate0.1PropConflicting0Dataset100.csv", row.names = 1)
+pca <- prcomp(datasetD)
+pcDistMat<- dist(pca$x[,1:2])
+njTree <- nj(pcDistMat)
+unrootedTree <- unroot(tree)
+unrootedNJTree <- unroot(njTree)
 
+tree$tip.label <- gsub("_", tree$tip.label, replacement = " ")
+p1 <- ggtree(tree)+
+  geom_tiplab(fontface = 4)+
+  xlim(NA, 5)
+p1 <- ggtree::rotate(p1, 36)
+p1
+
+plotDF <- as.data.frame(pca$x)
+
+plotDF$taxon <- gsub("_", " ", rownames(plotDF))
+plotDF$genus <- sub(" .*", "", plotDF$taxon)
+
+genera <- plotDF$genus
+
+shared_color_genera <- c("Colobus", "Gorilla", "Hylobates", "Papio", "Pan", "Pongo")
+
+# Assign base colors
+base_colors <- c(
+  Ardipithecus     = "gray30",
+  Australopithecus = "orange",
+  Homo             = "darkgreen",
+  Kenyanthropus    = "darkred",
+  Paranthropus     = "firebrick",
+  Sahelanthropus   = "mediumpurple",
+  Colobus          = "steelblue",
+  Gorilla          = "steelblue",
+  Hylobates        = "steelblue",
+  Papio            = "steelblue",
+  Pan              = "steelblue",
+  Pongo            = "steelblue"
+)
+
+  
+taxa_df <- plotDF %>%
+  distinct(taxon, genus) %>%
+  group_by(genus) %>%
+  mutate(species_index = row_number(),
+         n_species = n()) %>%
+  ungroup()
+
+# Assign color shades by genus and shared base color
+taxa_df$color <- mapply(function(genus, idx, n) {
+  lighten(base_colors[[genus]], idx / (n * 2))  # tweak shade spread
+}, taxa_df$genus, taxa_df$species_index, taxa_df$n_species, USE.NAMES = FALSE)
+
+# Create named vector for scale_color_manual
+taxon_colors <- setNames(taxa_df$color, taxa_df$taxon)
+
+# Plot
+p2 <- ggplot(plotDF, aes(x = PC1, y = PC2, color = taxon)) +
+  geom_point(size = 3) +
+  scale_color_manual(values = taxon_colors, name = "Species") +
+  xlab("PC1") +
+  ylab("PC2") +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    panel.grid.minor = element_blank()
+  )
+
+p2
