@@ -1093,13 +1093,17 @@ pruneFunc <- function(lddmmFile){
 lddmmFilesPruned <- parallel::mclapply(lddmmFiles, pruneFunc, mc.cores = 4)
 lddmmFilesPruned <- unlist(lddmmFilesPruned)
 
+rm(lddmmFiles)
+rm(doneFiles)
+gc()
+
 res <- pbapply::pblapply(lddmmFilesPruned, FUN = analysisFunction)
 
 resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
 for(i in 1:length(res)){
-  resmat[i, ] <- res[[i]]
+  resmat[i, ] <- as.numeric(res[[i]])
 }
-
+colnames(resmat) <- names(res[[i]])
 
 # # Mongle et al. (2023) dataset --------------------------------------------
 # 
