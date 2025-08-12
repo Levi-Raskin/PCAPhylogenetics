@@ -5,6 +5,9 @@ library(ggplot2)
 library(ggtree)
 library(phangorn)
 library(phytools)
+library(tictoc)
+library(data.table)
+library(geomorph)
 
 setwd("/Users/levir/Documents/GitHub/PCAPhylogenetics")
 
@@ -77,521 +80,9 @@ proportionConflicting <- c(0, 0.1, 0.25, 0.5) #proportion of characters that exh
 numTaxaConflicting <- c(2) #just rearranging 2 taxa to start
 #variableRates # drawn from gamma with parameters (1,10); (1,1); (10,1)
 
-# Simulation --------------------------------------------------------------
-
-simulationFunction <- function(tree, treeIdx){
-  resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
-  colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
-  
-  for(nC in numCharacters){
-    for(sR in setRate){
-      for(pc in proportionConflicting){
-        for(d in numDatasets){
-          
-          datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-          rownames(datasetD) = tree$tip.label
-          for(t in 1:nC){
-            traits <- fastBM(tree, sig2 = sR)
-            datasetD[,t] <- traits
-          }
-          
-          whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-          for(t in whichConflicting){
-            newVec <- datasetD[,t]
-            tax <- sample(nrow(datasetD), 2, replace = F)
-            tax1Val <- newVec[tax[1]]
-            tax2Val <- newVec[tax[2]]
-            
-            datasetD[tax[1],t] <- tax2Val
-            datasetD[tax[2],t] <- tax1Val
-          }
-          dt <- as.data.table(datasetD)
-          rownames(dt) <- rownames(datasetD)
-          
-          data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-          pca <- prcomp(datasetD)
-          plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-          pcDistMat<- dist(plotdf)
-          njTree <- nj(pcDistMat)
-          unrootedTree <- unroot(tree)
-          unrootedNJTree <- unroot(njTree)
-          resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
-          names(resVec) <- NULL
-          resMat[nrow(resMat) + 1, ] <- resVec
-        }
-      }
-    }
-    for(vR in 1:3){
-      for(pc in proportionConflicting){
-        if(vR == 1){
-          # 1, 10
-          for(d in numDatasets){
-            
-            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-            rownames(datasetD) = tree$tip.label
-            for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, scale = 10)
-              traits <- fastBM(tree, sig2 = rate)
-              datasetD[,t] <- traits
-            }
-            
-            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-            for(t in whichConflicting){
-              newVec <- datasetD[,t]
-              tax <- sample(nrow(datasetD), 2, replace = F)
-              tax1Val <- newVec[tax[1]]
-              tax2Val <- newVec[tax[2]]
-              
-              datasetD[tax[1],t] <- tax2Val
-              datasetD[tax[2],t] <- tax1Val
-            }
-            dt <- as.data.table(datasetD)
-            rownames(dt) <- rownames(datasetD)
-            
-            data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-            pca <- prcomp(datasetD)
-            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-            pcDistMat<- dist(plotdf)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else if (vR == 2){
-          # 1, 1
-          for(d in numDatasets){
-            
-            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-            rownames(datasetD) = tree$tip.label
-            for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, scale = 1)
-              traits <- fastBM(tree, sig2 = rate)
-              datasetD[,t] <- traits
-            }
-            
-            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-            for(t in whichConflicting){
-              newVec <- datasetD[,t]
-              tax <- sample(nrow(datasetD), 2, replace = F)
-              tax1Val <- newVec[tax[1]]
-              tax2Val <- newVec[tax[2]]
-              
-              datasetD[tax[1],t] <- tax2Val
-              datasetD[tax[2],t] <- tax1Val
-            }
-            dt <- as.data.table(datasetD)
-            rownames(dt) <- rownames(datasetD)
-            
-            data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-            pca <- prcomp(datasetD)
-            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-            pcDistMat<- dist(plotdf)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else{
-          # 10, 1
-          for(d in numDatasets){
-            
-            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-            rownames(datasetD) = tree$tip.label
-            for(t in 1:nC){
-              rate <- rgamma(1, shape = 10, scale = 1)
-              traits <- fastBM(tree, sig2 = rate)
-              datasetD[,t] <- traits
-            }
-            
-            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-            for(t in whichConflicting){
-              newVec <- datasetD[,t]
-              tax <- sample(nrow(datasetD), 2, replace = F)
-              tax1Val <- newVec[tax[1]]
-              tax2Val <- newVec[tax[2]]
-              
-              datasetD[tax[1],t] <- tax2Val
-              datasetD[tax[2],t] <- tax1Val
-            }
-            dt <- as.data.table(datasetD)
-            rownames(dt) <- rownames(datasetD)
-            data.table::fwrite((dt),  paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-            pca <- prcomp(datasetD)
-            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-            pcDistMat<- dist(plotdf)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }
-      }
-    }
-  }
-  return(list("phylo" = write.tree(tree), "resMat" = resMat))
-}
-
-resList <- list()
-
-for(i in 1:length(phyloList)){
-  print(paste("On tree idx: ", i))
-  resList[[i]] <- simulationFunction(phyloList[[i]], i)
-}
-
-saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
-
-simulationFunctionAllPCs <- function(tree, treeIdx){
-  resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
-  colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
-  
-  for(nC in numCharacters){
-    for(sR in setRate){
-      for(pc in proportionConflicting){
-        for(d in numDatasets){
-          datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-          pca <- prcomp(datasetD)
-          pcDistMat<- dist(pca$x)
-          njTree <- nj(pcDistMat)
-          unrootedTree <- unroot(tree)
-          unrootedNJTree <- unroot(njTree)
-          resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
-          names(resVec) <- NULL
-          resMat[nrow(resMat) + 1, ] <- resVec
-        }
-      }
-    }
-    for(vR in 1:3){
-      for(pc in proportionConflicting){
-        if(vR == 1){
-          # 1, 10
-          for(d in numDatasets){
-            datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-            pca <- prcomp(datasetD)
-            pcDistMat<- dist(pca$x)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else if (vR == 2){
-          # 1, 1
-          for(d in numDatasets){
-            
-            datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-            pca <- prcomp(datasetD)
-            pcDistMat<- dist(pca$x)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else{
-          # 10, 1
-          for(d in numDatasets){
-            datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-            pca <- prcomp(datasetD)
-            pcDistMat<- dist(pca$x)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }
-      }
-    }
-  }
-  return(list("phylo" = write.tree(tree), "resMat" = resMat))
-}
-
-resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
-  return(simulationFunctionAllPCs(phyloList[[i]], i))
-})
-
-saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs.rds")
-
-# Simulation-- 25, 50 characters -----------------------------------------
-
-numCharacters <- c(25, 50)
-
-simulationFunction <- function(tree, treeIdx){
-  resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
-  colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
-  
-  for(nC in numCharacters){
-    for(sR in setRate){
-      for(pc in proportionConflicting){
-        for(d in numDatasets){
-          
-          datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-          rownames(datasetD) = tree$tip.label
-          for(t in 1:nC){
-            traits <- fastBM(tree, sig2 = sR)
-            datasetD[,t] <- traits
-          }
-          
-          whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-          for(t in whichConflicting){
-            newVec <- datasetD[,t]
-            tax <- sample(nrow(datasetD), 2, replace = F)
-            tax1Val <- newVec[tax[1]]
-            tax2Val <- newVec[tax[2]]
-            
-            datasetD[tax[1],t] <- tax2Val
-            datasetD[tax[2],t] <- tax1Val
-          }
-          
-          dt <- as.data.table(datasetD)
-          rownames(dt) <- rownames(datasetD)
-          data.table::fwrite((dt), paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-          pca <- prcomp(datasetD)
-          plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-          pcDistMat<- dist(plotdf)
-          njTree <- nj(pcDistMat)
-          unrootedTree <- unroot(tree)
-          unrootedNJTree <- unroot(njTree)
-          resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
-          names(resVec) <- NULL
-          resMat[nrow(resMat) + 1, ] <- resVec
-        }
-      }
-    }
-    for(vR in 1:3){
-      for(pc in proportionConflicting){
-        if(vR == 1){
-          # 1, 10
-          for(d in numDatasets){
-            
-            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-            rownames(datasetD) = tree$tip.label
-            for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, scale = 10)
-              traits <- fastBM(tree, sig2 = rate)
-              datasetD[,t] <- traits
-            }
-            
-            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-            for(t in whichConflicting){
-              newVec <- datasetD[,t]
-              tax <- sample(nrow(datasetD), 2, replace = F)
-              tax1Val <- newVec[tax[1]]
-              tax2Val <- newVec[tax[2]]
-              
-              datasetD[tax[1],t] <- tax2Val
-              datasetD[tax[2],t] <- tax1Val
-            }
-            dt <- as.data.table(datasetD)
-            rownames(dt) <- rownames(datasetD)
-            
-            data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-            pca <- prcomp(datasetD)
-            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-            pcDistMat<- dist(plotdf)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else if (vR == 2){
-          # 1, 1
-          for(d in numDatasets){
-            
-            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-            rownames(datasetD) = tree$tip.label
-            for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, scale = 1)
-              traits <- fastBM(tree, sig2 = rate)
-              datasetD[,t] <- traits
-            }
-            
-            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-            for(t in whichConflicting){
-              newVec <- datasetD[,t]
-              tax <- sample(nrow(datasetD), 2, replace = F)
-              tax1Val <- newVec[tax[1]]
-              tax2Val <- newVec[tax[2]]
-              
-              datasetD[tax[1],t] <- tax2Val
-              datasetD[tax[2],t] <- tax1Val
-            }
-            dt <- as.data.table(datasetD)
-            rownames(dt) <- rownames(datasetD)
-            
-            data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-            pca <- prcomp(datasetD)
-            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-            pcDistMat<- dist(plotdf)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else{
-          # 10, 1
-          for(d in numDatasets){
-            
-            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-            rownames(datasetD) = tree$tip.label
-            for(t in 1:nC){
-              rate <- rgamma(1, shape = 10, scale = 1)
-              traits <- fastBM(tree, sig2 = rate)
-              datasetD[,t] <- traits
-            }
-            
-            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-            for(t in whichConflicting){
-              newVec <- datasetD[,t]
-              tax <- sample(nrow(datasetD), 2, replace = F)
-              tax1Val <- newVec[tax[1]]
-              tax2Val <- newVec[tax[2]]
-              
-              datasetD[tax[1],t] <- tax2Val
-              datasetD[tax[2],t] <- tax1Val
-            }
-            dt <- as.data.table(datasetD)
-            rownames(dt) <- rownames(datasetD)
-            
-            data.table::fwrite(dt,  paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-            pca <- prcomp(datasetD)
-            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-            pcDistMat<- dist(plotdf)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }
-      }
-    }
-  }
-  return(list("phylo" = write.tree(tree), "resMat" = resMat))
-}
-
-resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
-  return(simulationFunction(phyloList[[i]], i))
-})
-
-saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults25char50char.rds")
-
-simulationFunctionAllPCs <- function(tree, treeIdx){
-  resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
-  colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
-  
-  for(nC in numCharacters){
-    for(sR in setRate){
-      for(pc in proportionConflicting){
-        for(d in numDatasets){
-          datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-          pca <- prcomp(datasetD)
-          pcDistMat<- dist(pca$x)
-          njTree <- nj(pcDistMat)
-          unrootedTree <- unroot(tree)
-          unrootedNJTree <- unroot(njTree)
-          resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
-          names(resVec) <- NULL
-          resMat[nrow(resMat) + 1, ] <- resVec
-        }
-      }
-    }
-    for(vR in 1:3){
-      for(pc in proportionConflicting){
-        if(vR == 1){
-          # 1, 10
-          for(d in numDatasets){
-            datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-            pca <- prcomp(datasetD)
-            pcDistMat<- dist(pca$x)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else if (vR == 2){
-          # 1, 1
-          for(d in numDatasets){
-            
-            datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-            pca <- prcomp(datasetD)
-            pcDistMat<- dist(pca$x)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else{
-          # 10, 1
-          for(d in numDatasets){
-            datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-            pca <- prcomp(datasetD)
-            pcDistMat<- dist(pca$x)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }
-      }
-    }
-  }
-  return(list("phylo" = write.tree(tree), "resMat" = resMat))
-}
-
-resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
-  return(simulationFunctionAllPCs(phyloList[[i]], i))
-})
-
-saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs25char50char.rds")
-
-# mahalanobis_dist_matrix <- function(data) {
-#   # Ensure data is a matrix
-#   data <- as.matrix(data)
-#   
-#   # Compute the covariance matrix of the data
-#   cov_matrix <- cov(data)
-#   
-#   # Initialize distance matrix
-#   n <- nrow(data)
-#   dist_matrix <- matrix(0, n, n)
-#   rownames(dist_matrix) <- rownames(data)
-#   colnames(dist_matrix) <- rownames(data)
-#   
-#   # Compute pairwise Mahalanobis distances
-#   for (i in 1:n) {
-#     for (j in i:n) {
-#       d <- mahalanobis(data[i, ], data[j, ], cov_matrix)
-#       dist_matrix[i, j] <- d
-#       dist_matrix[j, i] <- d
-#     }
-#   }
-#   
-#   # Convert to "dist" object
-#   return(as.dist(dist_matrix))
-# }
+# # Simulation --------------------------------------------------------------
 # 
-# simulationFunction <-  function(tree, treeIdx){
+# simulationFunction <- function(tree, treeIdx){
 #   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
 #   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
 #   
@@ -600,10 +91,30 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #       for(pc in proportionConflicting){
 #         for(d in numDatasets){
 #           
-#           datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#           datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#           rownames(datasetD) = tree$tip.label
+#           for(t in 1:nC){
+#             traits <- fastBM(tree, sig2 = sR)
+#             datasetD[,t] <- traits
+#           }
+#           
+#           whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#           for(t in whichConflicting){
+#             newVec <- datasetD[,t]
+#             tax <- sample(nrow(datasetD), 2, replace = F)
+#             tax1Val <- newVec[tax[1]]
+#             tax2Val <- newVec[tax[2]]
+#             
+#             datasetD[tax[1],t] <- tax2Val
+#             datasetD[tax[2],t] <- tax1Val
+#           }
+#           dt <- as.data.table(datasetD)
+#           rownames(dt) <- rownames(datasetD)
+#           
+#           data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
 #           pca <- prcomp(datasetD)
 #           plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#           pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+#           pcDistMat<- dist(plotdf)
 #           njTree <- nj(pcDistMat)
 #           unrootedTree <- unroot(tree)
 #           unrootedNJTree <- unroot(njTree)
@@ -619,10 +130,153 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #           # 1, 10
 #           for(d in numDatasets){
 #             
-#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 1, scale = 10)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             dt <- as.data.table(datasetD)
+#             rownames(dt) <- rownames(datasetD)
+#             
+#             data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
 #             pca <- prcomp(datasetD)
 #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+#             pcDistMat<- dist(plotdf)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }else if (vR == 2){
+#           # 1, 1
+#           for(d in numDatasets){
+#             
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 1, scale = 1)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             dt <- as.data.table(datasetD)
+#             rownames(dt) <- rownames(datasetD)
+#             
+#             data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
+#             pca <- prcomp(datasetD)
+#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+#             pcDistMat<- dist(plotdf)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }else{
+#           # 10, 1
+#           for(d in numDatasets){
+#             
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 10, scale = 1)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             dt <- as.data.table(datasetD)
+#             rownames(dt) <- rownames(datasetD)
+#             data.table::fwrite((dt),  paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
+#             pca <- prcomp(datasetD)
+#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+#             pcDistMat<- dist(plotdf)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }
+#       }
+#     }
+#   }
+#   return(list("phylo" = write.tree(tree), "resMat" = resMat))
+# }
+# 
+# resList <- list()
+# 
+# for(i in 1:length(phyloList)){
+#   print(paste("On tree idx: ", i))
+#   resList[[i]] <- simulationFunction(phyloList[[i]], i)
+# }
+# 
+# saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
+# 
+# simulationFunctionAllPCs <- function(tree, treeIdx){
+#   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
+#   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
+#   
+#   for(nC in numCharacters){
+#     for(sR in setRate){
+#       for(pc in proportionConflicting){
+#         for(d in numDatasets){
+#           datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#           pca <- prcomp(datasetD)
+#           pcDistMat<- dist(pca$x)
+#           njTree <- nj(pcDistMat)
+#           unrootedTree <- unroot(tree)
+#           unrootedNJTree <- unroot(njTree)
+#           resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
+#           names(resVec) <- NULL
+#           resMat[nrow(resMat) + 1, ] <- resVec
+#         }
+#       }
+#     }
+#     for(vR in 1:3){
+#       for(pc in proportionConflicting){
+#         if(vR == 1){
+#           # 1, 10
+#           for(d in numDatasets){
+#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             pca <- prcomp(datasetD)
+#             pcDistMat<- dist(pca$x)
 #             njTree <- nj(pcDistMat)
 #             unrootedTree <- unroot(tree)
 #             unrootedNJTree <- unroot(njTree)
@@ -636,8 +290,7 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #             
 #             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
 #             pca <- prcomp(datasetD)
-#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+#             pcDistMat<- dist(pca$x)
 #             njTree <- nj(pcDistMat)
 #             unrootedTree <- unroot(tree)
 #             unrootedNJTree <- unroot(njTree)
@@ -650,8 +303,176 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #           for(d in numDatasets){
 #             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
 #             pca <- prcomp(datasetD)
+#             pcDistMat<- dist(pca$x)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }
+#       }
+#     }
+#   }
+#   return(list("phylo" = write.tree(tree), "resMat" = resMat))
+# }
+# 
+# resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
+#   return(simulationFunctionAllPCs(phyloList[[i]], i))
+# })
+# 
+# saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs.rds")
+# 
+# # Simulation-- 25, 50 characters -----------------------------------------
+# 
+# numCharacters <- c(25, 50)
+# 
+# simulationFunction <- function(tree, treeIdx){
+#   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
+#   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
+#   
+#   for(nC in numCharacters){
+#     for(sR in setRate){
+#       for(pc in proportionConflicting){
+#         for(d in numDatasets){
+#           
+#           datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#           rownames(datasetD) = tree$tip.label
+#           for(t in 1:nC){
+#             traits <- fastBM(tree, sig2 = sR)
+#             datasetD[,t] <- traits
+#           }
+#           
+#           whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#           for(t in whichConflicting){
+#             newVec <- datasetD[,t]
+#             tax <- sample(nrow(datasetD), 2, replace = F)
+#             tax1Val <- newVec[tax[1]]
+#             tax2Val <- newVec[tax[2]]
+#             
+#             datasetD[tax[1],t] <- tax2Val
+#             datasetD[tax[2],t] <- tax1Val
+#           }
+#           
+#           dt <- as.data.table(datasetD)
+#           rownames(dt) <- rownames(datasetD)
+#           data.table::fwrite((dt), paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
+#           pca <- prcomp(datasetD)
+#           plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+#           pcDistMat<- dist(plotdf)
+#           njTree <- nj(pcDistMat)
+#           unrootedTree <- unroot(tree)
+#           unrootedNJTree <- unroot(njTree)
+#           resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
+#           names(resVec) <- NULL
+#           resMat[nrow(resMat) + 1, ] <- resVec
+#         }
+#       }
+#     }
+#     for(vR in 1:3){
+#       for(pc in proportionConflicting){
+#         if(vR == 1){
+#           # 1, 10
+#           for(d in numDatasets){
+#             
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 1, scale = 10)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             dt <- as.data.table(datasetD)
+#             rownames(dt) <- rownames(datasetD)
+#             
+#             data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
+#             pca <- prcomp(datasetD)
 #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+#             pcDistMat<- dist(plotdf)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }else if (vR == 2){
+#           # 1, 1
+#           for(d in numDatasets){
+#             
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 1, scale = 1)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             dt <- as.data.table(datasetD)
+#             rownames(dt) <- rownames(datasetD)
+#             
+#             data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
+#             pca <- prcomp(datasetD)
+#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+#             pcDistMat<- dist(plotdf)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }else{
+#           # 10, 1
+#           for(d in numDatasets){
+#             
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 10, scale = 1)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             dt <- as.data.table(datasetD)
+#             rownames(dt) <- rownames(datasetD)
+#             
+#             data.table::fwrite(dt,  paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
+#             pca <- prcomp(datasetD)
+#             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+#             pcDistMat<- dist(plotdf)
 #             njTree <- nj(pcDistMat)
 #             unrootedTree <- unroot(tree)
 #             unrootedNJTree <- unroot(njTree)
@@ -670,280 +491,196 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #   return(simulationFunction(phyloList[[i]], i))
 # })
 # 
-# saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsMahalanobisDistancePC1PC225char50char.rds")
-
-
-# simulation - 500 characters ---------------------------------------------
-
-numCharacters <- c(500)
-
-simulationFunction <- function(tree, treeIdx){
-  resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
-  colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
-  
-  for(nC in numCharacters){
-    for(sR in setRate){
-      for(pc in proportionConflicting){
-        for(d in numDatasets){
-          
-          datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-          rownames(datasetD) = tree$tip.label
-          for(t in 1:nC){
-            traits <- fastBM(tree, sig2 = sR)
-            datasetD[,t] <- traits
-          }
-          
-          whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-          for(t in whichConflicting){
-            newVec <- datasetD[,t]
-            tax <- sample(nrow(datasetD), 2, replace = F)
-            tax1Val <- newVec[tax[1]]
-            tax2Val <- newVec[tax[2]]
-            
-            datasetD[tax[1],t] <- tax2Val
-            datasetD[tax[2],t] <- tax1Val
-          }
-          dt <- as.data.table(datasetD)
-          rownames(dt) <- rownames(datasetD)
-          
-          data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-          pca <- prcomp(datasetD)
-          plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-          pcDistMat<- dist(plotdf)
-          njTree <- nj(pcDistMat)
-          unrootedTree <- unroot(tree)
-          unrootedNJTree <- unroot(njTree)
-          resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
-          names(resVec) <- NULL
-          resMat[nrow(resMat) + 1, ] <- resVec
-        }
-      }
-    }
-    for(vR in 1:3){
-      for(pc in proportionConflicting){
-        if(vR == 1){
-          # 1, 10
-          for(d in numDatasets){
-            
-            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-            rownames(datasetD) = tree$tip.label
-            for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, scale = 10)
-              traits <- fastBM(tree, sig2 = rate)
-              datasetD[,t] <- traits
-            }
-            
-            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-            for(t in whichConflicting){
-              newVec <- datasetD[,t]
-              tax <- sample(nrow(datasetD), 2, replace = F)
-              tax1Val <- newVec[tax[1]]
-              tax2Val <- newVec[tax[2]]
-              
-              datasetD[tax[1],t] <- tax2Val
-              datasetD[tax[2],t] <- tax1Val
-            }
-            dt <- as.data.table(datasetD)
-            rownames(dt) <- rownames(datasetD)
-            
-            data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-            pca <- prcomp(datasetD)
-            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-            pcDistMat<- dist(plotdf)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else if (vR == 2){
-          # 1, 1
-          for(d in numDatasets){
-            
-            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-            rownames(datasetD) = tree$tip.label
-            for(t in 1:nC){
-              rate <- rgamma(1, shape = 1, scale = 1)
-              traits <- fastBM(tree, sig2 = rate)
-              datasetD[,t] <- traits
-            }
-            
-            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-            for(t in whichConflicting){
-              newVec <- datasetD[,t]
-              tax <- sample(nrow(datasetD), 2, replace = F)
-              tax1Val <- newVec[tax[1]]
-              tax2Val <- newVec[tax[2]]
-              
-              datasetD[tax[1],t] <- tax2Val
-              datasetD[tax[2],t] <- tax1Val
-            }
-            dt <- as.data.table(datasetD)
-            rownames(dt) <- rownames(datasetD)
-            
-            data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-            pca <- prcomp(datasetD)
-            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-            pcDistMat<- dist(plotdf)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else{
-          # 10, 1
-          for(d in numDatasets){
-            
-            datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
-            rownames(datasetD) = tree$tip.label
-            for(t in 1:nC){
-              rate <- rgamma(1, shape = 10, scale = 1)
-              traits <- fastBM(tree, sig2 = rate)
-              datasetD[,t] <- traits
-            }
-            
-            whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
-            for(t in whichConflicting){
-              newVec <- datasetD[,t]
-              tax <- sample(nrow(datasetD), 2, replace = F)
-              tax1Val <- newVec[tax[1]]
-              tax2Val <- newVec[tax[2]]
-              
-              datasetD[tax[1],t] <- tax2Val
-              datasetD[tax[2],t] <- tax1Val
-            }
-            dt <- as.data.table(datasetD)
-            rownames(dt) <- rownames(datasetD)
-            
-            data.table::fwrite(dt,  paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
-            pca <- prcomp(datasetD)
-            plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-            pcDistMat<- dist(plotdf)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }
-      }
-    }
-  }
-  return(list("phylo" = write.tree(tree), "resMat" = resMat))
-}
-
-resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
-  return(simulationFunction(phyloList[[i]], i))
-})
-
-saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults500char.rds")
-
-simulationFunctionAllPCs <- function(tree, treeIdx){
-  resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
-  colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
-  
-  for(nC in numCharacters){
-    for(sR in setRate){
-      for(pc in proportionConflicting){
-        for(d in numDatasets){
-          datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-          pca <- prcomp(datasetD)
-          pcDistMat<- dist(pca$x)
-          njTree <- nj(pcDistMat)
-          unrootedTree <- unroot(tree)
-          unrootedNJTree <- unroot(njTree)
-          resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
-          names(resVec) <- NULL
-          resMat[nrow(resMat) + 1, ] <- resVec
-        }
-      }
-    }
-    for(vR in 1:3){
-      for(pc in proportionConflicting){
-        if(vR == 1){
-          # 1, 10
-          for(d in numDatasets){
-            datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-            pca <- prcomp(datasetD)
-            pcDistMat<- dist(pca$x)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else if (vR == 2){
-          # 1, 1
-          for(d in numDatasets){
-            
-            datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-            pca <- prcomp(datasetD)
-            pcDistMat<- dist(pca$x)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }else{
-          # 10, 1
-          for(d in numDatasets){
-            datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
-            pca <- prcomp(datasetD)
-            pcDistMat<- dist(pca$x)
-            njTree <- nj(pcDistMat)
-            unrootedTree <- unroot(tree)
-            unrootedNJTree <- unroot(njTree)
-            resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
-            names(resVec) <- NULL
-            resMat[nrow(resMat) + 1, ] <- resVec
-          }
-        }
-      }
-    }
-  }
-  return(list("phylo" = write.tree(tree), "resMat" = resMat))
-}
-
-resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
-  return(simulationFunctionAllPCs(phyloList[[i]], i))
-})
-
-saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs500char.rds")
-
-# mahalanobis_dist_matrix <- function(data) {
-#   # Ensure data is a matrix
-#   data <- as.matrix(data)
+# saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults25char50char.rds")
+# 
+# simulationFunctionAllPCs <- function(tree, treeIdx){
+#   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
+#   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
 #   
-#   # Compute the covariance matrix of the data
-#   cov_matrix <- cov(data)
-#   
-#   # Initialize distance matrix
-#   n <- nrow(data)
-#   dist_matrix <- matrix(0, n, n)
-#   rownames(dist_matrix) <- rownames(data)
-#   colnames(dist_matrix) <- rownames(data)
-#   
-#   # Compute pairwise Mahalanobis distances
-#   for (i in 1:n) {
-#     for (j in i:n) {
-#       d <- mahalanobis(data[i, ], data[j, ], cov_matrix)
-#       dist_matrix[i, j] <- d
-#       dist_matrix[j, i] <- d
+#   for(nC in numCharacters){
+#     for(sR in setRate){
+#       for(pc in proportionConflicting){
+#         for(d in numDatasets){
+#           datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#           pca <- prcomp(datasetD)
+#           pcDistMat<- dist(pca$x)
+#           njTree <- nj(pcDistMat)
+#           unrootedTree <- unroot(tree)
+#           unrootedNJTree <- unroot(njTree)
+#           resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
+#           names(resVec) <- NULL
+#           resMat[nrow(resMat) + 1, ] <- resVec
+#         }
+#       }
+#     }
+#     for(vR in 1:3){
+#       for(pc in proportionConflicting){
+#         if(vR == 1){
+#           # 1, 10
+#           for(d in numDatasets){
+#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             pca <- prcomp(datasetD)
+#             pcDistMat<- dist(pca$x)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }else if (vR == 2){
+#           # 1, 1
+#           for(d in numDatasets){
+#             
+#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             pca <- prcomp(datasetD)
+#             pcDistMat<- dist(pca$x)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }else{
+#           # 10, 1
+#           for(d in numDatasets){
+#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             pca <- prcomp(datasetD)
+#             pcDistMat<- dist(pca$x)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }
+#       }
 #     }
 #   }
-#   
-#   # Convert to "dist" object
-#   return(as.dist(dist_matrix))
+#   return(list("phylo" = write.tree(tree), "resMat" = resMat))
 # }
 # 
-# simulationFunction <-  function(tree, treeIdx){
+# resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
+#   return(simulationFunctionAllPCs(phyloList[[i]], i))
+# })
+# 
+# saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs25char50char.rds")
+# 
+# # mahalanobis_dist_matrix <- function(data) {
+# #   # Ensure data is a matrix
+# #   data <- as.matrix(data)
+# #   
+# #   # Compute the covariance matrix of the data
+# #   cov_matrix <- cov(data)
+# #   
+# #   # Initialize distance matrix
+# #   n <- nrow(data)
+# #   dist_matrix <- matrix(0, n, n)
+# #   rownames(dist_matrix) <- rownames(data)
+# #   colnames(dist_matrix) <- rownames(data)
+# #   
+# #   # Compute pairwise Mahalanobis distances
+# #   for (i in 1:n) {
+# #     for (j in i:n) {
+# #       d <- mahalanobis(data[i, ], data[j, ], cov_matrix)
+# #       dist_matrix[i, j] <- d
+# #       dist_matrix[j, i] <- d
+# #     }
+# #   }
+# #   
+# #   # Convert to "dist" object
+# #   return(as.dist(dist_matrix))
+# # }
+# # 
+# # simulationFunction <-  function(tree, treeIdx){
+# #   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
+# #   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
+# #   
+# #   for(nC in numCharacters){
+# #     for(sR in setRate){
+# #       for(pc in proportionConflicting){
+# #         for(d in numDatasets){
+# #           
+# #           datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+# #           pca <- prcomp(datasetD)
+# #           plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+# #           pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+# #           njTree <- nj(pcDistMat)
+# #           unrootedTree <- unroot(tree)
+# #           unrootedNJTree <- unroot(njTree)
+# #           resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
+# #           names(resVec) <- NULL
+# #           resMat[nrow(resMat) + 1, ] <- resVec
+# #         }
+# #       }
+# #     }
+# #     for(vR in 1:3){
+# #       for(pc in proportionConflicting){
+# #         if(vR == 1){
+# #           # 1, 10
+# #           for(d in numDatasets){
+# #             
+# #             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+# #             pca <- prcomp(datasetD)
+# #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+# #             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+# #             njTree <- nj(pcDistMat)
+# #             unrootedTree <- unroot(tree)
+# #             unrootedNJTree <- unroot(njTree)
+# #             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
+# #             names(resVec) <- NULL
+# #             resMat[nrow(resMat) + 1, ] <- resVec
+# #           }
+# #         }else if (vR == 2){
+# #           # 1, 1
+# #           for(d in numDatasets){
+# #             
+# #             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+# #             pca <- prcomp(datasetD)
+# #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+# #             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+# #             njTree <- nj(pcDistMat)
+# #             unrootedTree <- unroot(tree)
+# #             unrootedNJTree <- unroot(njTree)
+# #             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
+# #             names(resVec) <- NULL
+# #             resMat[nrow(resMat) + 1, ] <- resVec
+# #           }
+# #         }else{
+# #           # 10, 1
+# #           for(d in numDatasets){
+# #             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+# #             pca <- prcomp(datasetD)
+# #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+# #             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+# #             njTree <- nj(pcDistMat)
+# #             unrootedTree <- unroot(tree)
+# #             unrootedNJTree <- unroot(njTree)
+# #             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
+# #             names(resVec) <- NULL
+# #             resMat[nrow(resMat) + 1, ] <- resVec
+# #           }
+# #         }
+# #       }
+# #     }
+# #   }
+# #   return(list("phylo" = write.tree(tree), "resMat" = resMat))
+# # }
+# # 
+# # resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
+# #   return(simulationFunction(phyloList[[i]], i))
+# # })
+# # 
+# # saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsMahalanobisDistancePC1PC225char50char.rds")
+# 
+# 
+# # simulation - 500 characters ---------------------------------------------
+# 
+# numCharacters <- c(500)
+# 
+# simulationFunction <- function(tree, treeIdx){
 #   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
 #   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
 #   
@@ -952,10 +689,30 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #       for(pc in proportionConflicting){
 #         for(d in numDatasets){
 #           
-#           datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#           datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#           rownames(datasetD) = tree$tip.label
+#           for(t in 1:nC){
+#             traits <- fastBM(tree, sig2 = sR)
+#             datasetD[,t] <- traits
+#           }
+#           
+#           whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#           for(t in whichConflicting){
+#             newVec <- datasetD[,t]
+#             tax <- sample(nrow(datasetD), 2, replace = F)
+#             tax1Val <- newVec[tax[1]]
+#             tax2Val <- newVec[tax[2]]
+#             
+#             datasetD[tax[1],t] <- tax2Val
+#             datasetD[tax[2],t] <- tax1Val
+#           }
+#           dt <- as.data.table(datasetD)
+#           rownames(dt) <- rownames(datasetD)
+#           
+#           data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
 #           pca <- prcomp(datasetD)
 #           plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#           pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+#           pcDistMat<- dist(plotdf)
 #           njTree <- nj(pcDistMat)
 #           unrootedTree <- unroot(tree)
 #           unrootedNJTree <- unroot(njTree)
@@ -971,10 +728,31 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #           # 1, 10
 #           for(d in numDatasets){
 #             
-#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 1, scale = 10)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             dt <- as.data.table(datasetD)
+#             rownames(dt) <- rownames(datasetD)
+#             
+#             data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
 #             pca <- prcomp(datasetD)
 #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+#             pcDistMat<- dist(plotdf)
 #             njTree <- nj(pcDistMat)
 #             unrootedTree <- unroot(tree)
 #             unrootedNJTree <- unroot(njTree)
@@ -986,10 +764,31 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #           # 1, 1
 #           for(d in numDatasets){
 #             
-#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 1, scale = 1)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             dt <- as.data.table(datasetD)
+#             rownames(dt) <- rownames(datasetD)
+#             
+#             data.table::fwrite(dt, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
 #             pca <- prcomp(datasetD)
 #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+#             pcDistMat<- dist(plotdf)
 #             njTree <- nj(pcDistMat)
 #             unrootedTree <- unroot(tree)
 #             unrootedNJTree <- unroot(njTree)
@@ -1000,10 +799,32 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #         }else{
 #           # 10, 1
 #           for(d in numDatasets){
-#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             
+#             datasetD <- matrix(data = NA, nrow = Ntip(tree), ncol = nC)
+#             rownames(datasetD) = tree$tip.label
+#             for(t in 1:nC){
+#               rate <- rgamma(1, shape = 10, scale = 1)
+#               traits <- fastBM(tree, sig2 = rate)
+#               datasetD[,t] <- traits
+#             }
+#             
+#             whichConflicting <- sample(1:nC, size = round(pc * nC), replace = FALSE)
+#             for(t in whichConflicting){
+#               newVec <- datasetD[,t]
+#               tax <- sample(nrow(datasetD), 2, replace = F)
+#               tax1Val <- newVec[tax[1]]
+#               tax2Val <- newVec[tax[2]]
+#               
+#               datasetD[tax[1],t] <- tax2Val
+#               datasetD[tax[2],t] <- tax1Val
+#             }
+#             dt <- as.data.table(datasetD)
+#             rownames(dt) <- rownames(datasetD)
+#             
+#             data.table::fwrite(dt,  paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = TRUE, verbose = FALSE)
 #             pca <- prcomp(datasetD)
 #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
-#             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+#             pcDistMat<- dist(plotdf)
 #             njTree <- nj(pcDistMat)
 #             unrootedTree <- unroot(tree)
 #             unrootedNJTree <- unroot(njTree)
@@ -1022,12 +843,193 @@ saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #   return(simulationFunction(phyloList[[i]], i))
 # })
 # 
-# saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsMahalanobisDistancePC1PC2500char.rds")
-
+# saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults500char.rds")
+# 
+# simulationFunctionAllPCs <- function(tree, treeIdx){
+#   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
+#   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
+#   
+#   for(nC in numCharacters){
+#     for(sR in setRate){
+#       for(pc in proportionConflicting){
+#         for(d in numDatasets){
+#           datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#           pca <- prcomp(datasetD)
+#           pcDistMat<- dist(pca$x)
+#           njTree <- nj(pcDistMat)
+#           unrootedTree <- unroot(tree)
+#           unrootedNJTree <- unroot(njTree)
+#           resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
+#           names(resVec) <- NULL
+#           resMat[nrow(resMat) + 1, ] <- resVec
+#         }
+#       }
+#     }
+#     for(vR in 1:3){
+#       for(pc in proportionConflicting){
+#         if(vR == 1){
+#           # 1, 10
+#           for(d in numDatasets){
+#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             pca <- prcomp(datasetD)
+#             pcDistMat<- dist(pca$x)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }else if (vR == 2){
+#           # 1, 1
+#           for(d in numDatasets){
+#             
+#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             pca <- prcomp(datasetD)
+#             pcDistMat<- dist(pca$x)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }else{
+#           # 10, 1
+#           for(d in numDatasets){
+#             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+#             pca <- prcomp(datasetD)
+#             pcDistMat<- dist(pca$x)
+#             njTree <- nj(pcDistMat)
+#             unrootedTree <- unroot(tree)
+#             unrootedNJTree <- unroot(njTree)
+#             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
+#             names(resVec) <- NULL
+#             resMat[nrow(resMat) + 1, ] <- resVec
+#           }
+#         }
+#       }
+#     }
+#   }
+#   return(list("phylo" = write.tree(tree), "resMat" = resMat))
+# }
+# 
+# resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
+#   return(simulationFunctionAllPCs(phyloList[[i]], i))
+# })
+# 
+# saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs500char.rds")
+# 
+# # mahalanobis_dist_matrix <- function(data) {
+# #   # Ensure data is a matrix
+# #   data <- as.matrix(data)
+# #   
+# #   # Compute the covariance matrix of the data
+# #   cov_matrix <- cov(data)
+# #   
+# #   # Initialize distance matrix
+# #   n <- nrow(data)
+# #   dist_matrix <- matrix(0, n, n)
+# #   rownames(dist_matrix) <- rownames(data)
+# #   colnames(dist_matrix) <- rownames(data)
+# #   
+# #   # Compute pairwise Mahalanobis distances
+# #   for (i in 1:n) {
+# #     for (j in i:n) {
+# #       d <- mahalanobis(data[i, ], data[j, ], cov_matrix)
+# #       dist_matrix[i, j] <- d
+# #       dist_matrix[j, i] <- d
+# #     }
+# #   }
+# #   
+# #   # Convert to "dist" object
+# #   return(as.dist(dist_matrix))
+# # }
+# # 
+# # simulationFunction <-  function(tree, treeIdx){
+# #   resMat <- data.frame(matrix(data = NA, nrow = 0, ncol = 8))
+# #   colnames(resMat) <- c("RF", "SPR", "SPRe", "numCharacters", "setRate", "variableRateShape", "variableRateScale", "propConflicting")
+# #   
+# #   for(nC in numCharacters){
+# #     for(sR in setRate){
+# #       for(pc in proportionConflicting){
+# #         for(d in numDatasets){
+# #           
+# #           datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "SetRate", sR,"PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+# #           pca <- prcomp(datasetD)
+# #           plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+# #           pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+# #           njTree <- nj(pcDistMat)
+# #           unrootedTree <- unroot(tree)
+# #           unrootedNJTree <- unroot(njTree)
+# #           resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, sR, NA, NA, pc) 
+# #           names(resVec) <- NULL
+# #           resMat[nrow(resMat) + 1, ] <- resVec
+# #         }
+# #       }
+# #     }
+# #     for(vR in 1:3){
+# #       for(pc in proportionConflicting){
+# #         if(vR == 1){
+# #           # 1, 10
+# #           for(d in numDatasets){
+# #             
+# #             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+# #             pca <- prcomp(datasetD)
+# #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+# #             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+# #             njTree <- nj(pcDistMat)
+# #             unrootedTree <- unroot(tree)
+# #             unrootedNJTree <- unroot(njTree)
+# #             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 10, pc) 
+# #             names(resVec) <- NULL
+# #             resMat[nrow(resMat) + 1, ] <- resVec
+# #           }
+# #         }else if (vR == 2){
+# #           # 1, 1
+# #           for(d in numDatasets){
+# #             
+# #             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape1Scale1PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+# #             pca <- prcomp(datasetD)
+# #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+# #             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+# #             njTree <- nj(pcDistMat)
+# #             unrootedTree <- unroot(tree)
+# #             unrootedNJTree <- unroot(njTree)
+# #             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 1, 1, pc) 
+# #             names(resVec) <- NULL
+# #             resMat[nrow(resMat) + 1, ] <- resVec
+# #           }
+# #         }else{
+# #           # 10, 1
+# #           for(d in numDatasets){
+# #             datasetD <- read.csv(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree", treeIdx, "NumChar", nC, "VarRatesShape10Scale10PropConflicting",pc,"Dataset",d,  ".csv", sep = ""), row.names = 1)
+# #             pca <- prcomp(datasetD)
+# #             plotdf <- data.frame(tax = rownames(datasetD), pc1 = pca$x[,1], pc2 = pca$x[,2])
+# #             pcDistMat<- mahalanobis_dist_matrix(plotdf[,2:3])
+# #             njTree <- nj(pcDistMat)
+# #             unrootedTree <- unroot(tree)
+# #             unrootedNJTree <- unroot(njTree)
+# #             resVec <- c(dist.topo(unrootedNJTree, unrootedTree), rSPRFunc(unrootedNJTree, unrootedTree), sprMast(unrootedNJTree, unrootedTree), nC, NA, 10, 1, pc) 
+# #             names(resVec) <- NULL
+# #             resMat[nrow(resMat) + 1, ] <- resVec
+# #           }
+# #         }
+# #       }
+# #     }
+# #   }
+# #   return(list("phylo" = write.tree(tree), "resMat" = resMat))
+# # }
+# # 
+# # resList <- pbapply::pblapply(1:length(phyloList), FUN = function(i){
+# #   return(simulationFunction(phyloList[[i]], i))
+# # })
+# # 
+# # saveRDS(resList, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsMahalanobisDistancePC1PC2500char.rds")
+# 
 
 # LDDMM results -----------------------------------------------------------
-library(tictoc)
-library(data.table)
+### non procrustes
 
 analysisFunction <- function(lddmmFile){
   tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
@@ -1063,7 +1065,7 @@ analysisFunction <- function(lddmmFile){
   unrootedNJTree <- unroot(njTree)
   
   ### this is the expensive step
-  sprd <- rSPRFunc2(unrootedNJTree, unrootedTree)
+  sprd <- rSPRFunc(unrootedNJTree, unrootedTree)
   
   resMat = as.data.frame(matrix(data = NA, nrow = 1, ncol = 6))
   colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
@@ -1104,6 +1106,122 @@ for(i in 1:length(res)){
   resmat[i, ] <- as.numeric(res[[i]])
 }
 colnames(resmat) <- names(res[[i]])
+
+
+### Procrustes
+
+analysisFunctionProc <- function(lddmmFile){
+  tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
+  dimension <- (regmatches(lddmmFile, regexpr("(?<=LDDMMSimRes/).*?(?=Dimension)", lddmmFile, perl = TRUE)))
+  numLandmarks <- as.numeric(regmatches(lddmmFile, regexpr("(?<=LM).*?(?=Alpha)", lddmmFile, perl = TRUE)))
+  alpha <- as.numeric(regmatches(lddmmFile, regexpr("(?<=Alpha).*?(?=Dataset)", lddmmFile, perl = TRUE)))
+  if(dimension == "three"){
+    dimension <- 3
+  }else if(dimension == "two"){
+    dimension <- 2
+  }
+  
+  landmarks <- read.delim(lddmmFile, header = F)
+  cn <- colnames(landmarks)
+  cn[1] <- "label"
+  cn[2] <- "lm"
+  colnames(landmarks) <- cn
+  
+  pcaMat <- matrix(data = NA, nrow = length(unique(landmarks$label)), ncol = dimension * numLandmarks)
+  rownames(pcaMat) = unique(landmarks$label)
+  for(i in unique(landmarks$label)){
+    lm <- as.matrix(filter(landmarks, label == i))
+    lm <- c(lm[, 3:ncol(lm)])
+    for(j in 1:length(lm)){
+      pcaMat[which(rownames(pcaMat)== i), j] = as.numeric(lm[j]) 
+    }
+  }
+  ### gpagen expects an array containing n x d slices where n is num landmarks and d is dimension of ladnmarks
+  
+  pcaMat <- geomorph::arrayspecs(pcaMat, numLandmarks, k = dimension)
+  proc <- geomorph::gpagen(A = pcaMat, verbose = FALSE,print.progress = FALSE)
+  
+  pca <- geomorph::gm.prcomp(proc$coords)
+  
+  pcDistMat<- dist(pca$x[,1:2])
+  njTree <- nj(pcDistMat)
+  unrootedTree <- unroot(tree)
+  unrootedNJTree <- unroot(njTree)
+  
+  ### this is the expensive step
+  sprd <- rSPRFunc2(unrootedNJTree, unrootedTree)
+  
+  resMat = as.data.frame(matrix(data = NA, nrow = 1, ncol = 6))
+  colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
+  resMat[1,] <- c(dist.topo(unrootedNJTree, unrootedTree), sprd, sprd / Ntip(mast(unrootedNJTree, unrootedTree)),numLandmarks, dimension, alpha)
+  resMat <- as.data.table(resMat)
+  fwrite(resMat, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/", regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE)), "Procrustes", ".csv", sep = ""))
+  
+  return(resMat)
+}
+
+lddmmFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes",full.names = T)
+doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes")
+
+#prune already analyzed lddmm files
+pruneFunc <- function(lddmmFile){
+  tag <- regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE))
+  tag <- paste(tag, ".csv", sep = "")
+  
+  if(tag %in% doneFiles){
+    
+  }else{
+    return(lddmmFile)
+  }
+  
+}
+
+lddmmFilesPruned <- parallel::mclapply(lddmmFiles, pruneFunc, mc.cores = 4)
+lddmmFilesPruned <- unlist(lddmmFilesPruned)
+
+rm(lddmmFiles)
+rm(doneFiles)
+gc()
+
+res <- pbapply::pblapply(lddmmFilesPruned, FUN = analysisFunctionProc)
+
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+}
+colnames(resmat) <- names(res[[i]])
+
+### analysis
+doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/", full.names = T)
+
+res <- parallel::mclapply(doneFiles, data.table::fread, mc.cores = 4)
+
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+
+
+
+## function to find place in lddmm forward sims
+maxTree <- function(lddmmFile, lm){
+  numLandmarks <- as.numeric(regmatches(lddmmFile, regexpr("(?<=LM).*?(?=Alpha)", lddmmFile, perl = TRUE)))
+  if(numLandmarks == lm){
+    tree <- as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))
+    return(tree)
+  }
+}
+
+res <- parallel::mclapply(lddmmFiles, function(i){
+  return(maxTree(i, 50))
+}, mc.cores = 12)
+
+x <- unlist(res)
+table(x)
 
 # # Mongle et al. (2023) dataset --------------------------------------------
 # 
@@ -1286,7 +1404,7 @@ median(rfDists)
 mean(sprDists)
 
 
-# Analysis ----------------------------------------------------------------
+# Brownian motion Analysis ----------------------------------------------------------------
 
 simResPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
 simRes2550PC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults25char50char.rds")
@@ -1300,6 +1418,9 @@ for(i in 1:length(simResPC1PC2)){
     concatDFPC1PC2 <- simResPC1PC2[[1]]$resMat
   }else{
     concatDFPC1PC2 <- rbind(concatDFPC1PC2, simResPC1PC2[[i]]$resMat)
+  }
+  if(i %% 10 == 0){
+    print(i)
   }
 }
 
@@ -1316,6 +1437,11 @@ nrow(concatDFPC1PC2)
 summary(concatDFPC1PC2$RF)
 summary(concatDFPC1PC2$SPR)
 
+for(i in unique(concatDFPC1PC2$numCharacters)){
+  print(paste("nc: ", i, " with ", sum(filter(concatDFPC1PC2, numCharacters==i)$RF==0)))
+}
+
+
 simResAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs.rds")
 simRes2550All <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs25char50char.rds")
 simRes500All <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsAllPCs500char.rds")
@@ -1328,7 +1454,11 @@ for(i in 1:length(simResAll)){
   }else{
     concatDFAll <- rbind(concatDFAll, simResAll[[i]]$resMat)
   }
+  if(i %% 100 == 0){
+    print(i)
+  }
 }
+
 concatDFAll$numCharacters <- as.factor(concatDFAll$numCharacters)
 concatDFAll$setRate <- as.factor(concatDFAll$setRate)
 concatDFAll$propConflicting <- as.factor(concatDFAll$propConflicting)
@@ -1341,6 +1471,9 @@ sum(concatDFAll$RF == 0)
 summary(concatDFAll$RF)
 summary(concatDFAll$SPR)
 
+for(i in unique(concatDFAll$numCharacters)){
+  print(paste("nc: ", i, " with ", sum(filter(concatDFAll, numCharacters==i)$RF==0)))
+}
 
 
 simResMahalPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResultsMahalanobisDistancePC1PC2.rds")
@@ -1370,8 +1503,8 @@ summary(concatDFMPC12$SPR)
 summary(concatDFMPC12$RF)
 
 
-
 #are the distributions sig. different between set rate and varrate expectation across numcharacters
+#spr
 nc <- unique(concatDFPC1PC2$numCharacters)
 varRatesLG <- TRUE
 rate <- c(0.1, 1, 10)
@@ -1384,7 +1517,28 @@ for(c in nc){
     print("Mean for var rate: ")
     print(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR))
     
-    if(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR) < mean(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$SPR) && r != 10){
+    if(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR) < mean(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$SPR)){
+      varRatesLG <- FALSE
+    }
+    
+    print(paste("p =", wilcox.test(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$SPR, filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR)$p.value))
+    print("------------------------------")
+  }
+}
+#rf
+nc <- unique(concatDFPC1PC2$numCharacters)
+varRatesLG <- TRUE
+rate <- c(0.1, 1, 10)
+meanDiff <- c()
+for(c in nc){
+  for(r in rate){
+    print(paste(c,"characters for rate", r))
+    print("Mean for set rate: ")
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$RF))
+    print("Mean for var rate: ")
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$RF))
+    
+    if(mean(filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$RF) < mean(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$RF)){
       varRatesLG <- FALSE
     }
     
@@ -1393,6 +1547,7 @@ for(c in nc){
   }
 }
 
+#spr
 nc <- unique(concatDFAll$numCharacters)
 rate <- c(0.1, 1, 10)
 varRatesLG <- TRUE
@@ -1411,6 +1566,26 @@ for(c in nc){
     print("------------------------------")
   }
 }
+#RF
+nc <- unique(concatDFAll$numCharacters)
+rate <- c(0.1, 1, 10)
+varRatesLG <- TRUE
+for(c in nc){
+  for(r in rate){
+    print(paste(c,"characters for rate", r))
+    print("Mean for set rate: ")
+    print(mean(filter(concatDFAll, numCharacters == c, setRate == r, propConflicting ==0)$RF))
+    print("Mean for var rate: ")
+    print(mean(filter(concatDFAll, numCharacters == c, varRateExpectation == r, propConflicting ==0)$RF))
+    if(mean(filter(concatDFAll, numCharacters == c, varRateExpectation == r, propConflicting ==0)$RF) < mean(filter(concatDFAll, numCharacters == c, setRate == r, propConflicting ==0)$RF)){
+      varRatesLG <- FALSE
+    }
+    
+    print(paste("p =", wilcox.test(filter(concatDFAll, numCharacters == c, setRate == r, propConflicting ==0)$RF, filter(concatDFAll, numCharacters == c, varRateExpectation == r, propConflicting ==0)$RF)$p.value))
+    print("------------------------------")
+  }
+}
+
 
 
 nc <- unique(concatDFPC1PC2$numCharacters)
@@ -1444,7 +1619,6 @@ for(c in nc){
     print("------------------------------")
   }
 }
-
 
 nc <- unique(concatDFPC1PC2$numCharacters)
 pc <- unique(concatDFPC1PC2$propConflicting)
@@ -1489,3 +1663,19 @@ for(c in nc){
   print(paste("Num trees identical for char", c))
   print(nrow(filter(concatDFAll, RF==0, numCharacters == c)))
 }
+
+# LDDMM analysis ----------------------------------------------------------
+#unaligned
+doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances", full.names = T)
+
+res <- parallel::mclapply(doneFiles, data.table::fread, mc.cores = 4)
+
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+

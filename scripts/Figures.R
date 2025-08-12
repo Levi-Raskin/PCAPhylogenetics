@@ -397,6 +397,9 @@ for(i in 1:length(simResPC1PC2)){
   }else{
     concatDF <- rbind(concatDF, simResPC1PC2[[i]]$resMat)
   }
+  if(i %% 100 == 0){
+    print(i)
+  }
 }
 concatDF$numCharacters <- as.factor(concatDF$numCharacters)
 concatDF$setRate <- as.factor(concatDF$setRate)
@@ -418,7 +421,7 @@ p1 <- ggplot() +
                   aes(x = numCharacters, y = SPR, fill = varRateExpectation), side = "l", scale = "width")+
   scale_fill_manual(name = "Variable rates", values = red_colors) +
   new_scale_fill()+
-  scale_y_continuous(breaks = 0:12) +
+  scale_y_continuous(breaks = 0:13) +
   xlab(NULL)+
   theme_minimal() +
   theme(legend.position = "right",
@@ -431,7 +434,7 @@ p2 <- ggplot() +
   geom_violin(data = concatDF,
                   aes(x = numCharacters, y = SPR, fill = propConflicting), scale ="width")+
   scale_fill_manual(name = "% traits conflicting", values = blue_colors) +
-  scale_y_continuous(breaks = 0:12) +
+  scale_y_continuous(breaks = 0:13) +
   xlab("Number of characters")+
   theme_minimal() +
   theme(legend.position = "right",
