@@ -39,6 +39,32 @@ rSPRFunc2 <- function(tree1, tree2){
   return(as.integer(nums))
 }
 
+rSPRFunc3 <- function(tree1, tree2){
+  treelist <- list(tree1, tree2)
+  write.tree(treelist, paste(getwd(), "/rSPR/res3.nwk", sep = ""))
+  res <- system(
+    paste(getwd(), 
+          "/rSPR/rspr3 -pairwise -unrooted -no-symmetric-pairwise < ",
+          getwd(), 
+          "/rSPR/res3.nwk", sep = "") 
+    , intern = T)
+  nums <- sub("^[^,]*,\\s*([0-9]+)\"?$", "\\1", res[[1]])
+  return(as.integer(nums))
+}
+
+rSPRFunc4 <- function(tree1, tree2){
+  treelist <- list(tree1, tree2)
+  write.tree(treelist, paste(getwd(), "/rSPR/res4.nwk", sep = ""))
+  res <- system(
+    paste(getwd(), 
+          "/rSPR/rspr4 -pairwise -unrooted -no-symmetric-pairwise < ",
+          getwd(), 
+          "/rSPR/res4.nwk", sep = "") 
+    , intern = T)
+  nums <- sub("^[^,]*,\\s*([0-9]+)\"?$", "\\1", res[[1]])
+  return(as.integer(nums))
+}
+
 
 sprMast <- function(tree1, tree2){
   sprDist <- rSPRFunc(tree1, tree2)
@@ -1029,8 +1055,12 @@ numTaxaConflicting <- c(2) #just rearranging 2 taxa to start
 # 
 
 # LDDMM results -----------------------------------------------------------
-### non procrustes
 
+
+### PC1 and 2 only ###
+
+### non procrustes
+#rSPRFunc
 analysisFunction <- function(lddmmFile){
   tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
   dimension <- (regmatches(lddmmFile, regexpr("(?<=LDDMMSimRes/).*?(?=Dimension)", lddmmFile, perl = TRUE)))
@@ -1109,7 +1139,7 @@ colnames(resmat) <- names(res[[i]])
 
 
 ### Procrustes
-
+#rSPRFunc3
 analysisFunctionProc <- function(lddmmFile){
   tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
   dimension <- (regmatches(lddmmFile, regexpr("(?<=LDDMMSimRes/).*?(?=Dimension)", lddmmFile, perl = TRUE)))
@@ -1149,7 +1179,7 @@ analysisFunctionProc <- function(lddmmFile){
   unrootedNJTree <- unroot(njTree)
   
   ### this is the expensive step
-  sprd <- rSPRFunc2(unrootedNJTree, unrootedTree)
+  sprd <- rSPRFunc3(unrootedNJTree, unrootedTree)
   
   resMat = as.data.frame(matrix(data = NA, nrow = 1, ncol = 6))
   colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
@@ -1207,6 +1237,160 @@ colnames(resmat) <- names(res[[i]])
 
 
 
+### ALL PCs
+
+#rSPRFunc4
+### non procrustes
+analysisFunctionAll <- function(lddmmFile){
+  tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
+  dimension <- (regmatches(lddmmFile, regexpr("(?<=LDDMMSimRes/).*?(?=Dimension)", lddmmFile, perl = TRUE)))
+  numLandmarks <- as.numeric(regmatches(lddmmFile, regexpr("(?<=LM).*?(?=Alpha)", lddmmFile, perl = TRUE)))
+  alpha <- as.numeric(regmatches(lddmmFile, regexpr("(?<=Alpha).*?(?=Dataset)", lddmmFile, perl = TRUE)))
+  if(dimension == "three"){
+    dimension <- 3
+  }else if(dimension == "two"){
+    dimension <- 2
+  }
+  
+  landmarks <- read.delim(lddmmFile, header = F)
+  cn <- colnames(landmarks)
+  cn[1] <- "label"
+  cn[2] <- "lm"
+  colnames(landmarks) <- cn
+  
+  pcaMat <- matrix(data = NA, nrow = length(unique(landmarks$label)), ncol = dimension * numLandmarks)
+  rownames(pcaMat) = unique(landmarks$label)
+  for(i in unique(landmarks$label)){
+    lm <- as.matrix(filter(landmarks, label == i))
+    lm <- c(lm[, 3:ncol(lm)])
+    for(j in 1:length(lm)){
+      pcaMat[which(rownames(pcaMat)== i), j] = as.numeric(lm[j]) 
+    }
+  }
+  pca <- prcomp(pcaMat)
+  
+  pcDistMat<- dist(pca$x)
+  njTree <- nj(pcDistMat)
+  unrootedTree <- unroot(tree)
+  unrootedNJTree <- unroot(njTree)
+  
+  ### this is the expensive step
+  sprd <- rSPRFunc4(unrootedNJTree, unrootedTree)
+  
+  resMat = as.data.frame(matrix(data = NA, nrow = 1, ncol = 6))
+  colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
+  resMat[1,] <- c(dist.topo(unrootedNJTree, unrootedTree), sprd, sprd / Ntip(mast(unrootedNJTree, unrootedTree)),numLandmarks, dimension, alpha)
+  resMat <- as.data.table(resMat)
+  fwrite(resMat, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/", regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE)), ".csv", sep = ""))
+  
+  return(resMat)
+}
+
+lddmmFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes",full.names = T)
+doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/")
+
+#prune already analyzed lddmm files
+pruneFunc <- function(lddmmFile){
+  tag <- regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE))
+  tag <- paste(tag, ".csv", sep = "")
+  
+  if(tag %in% doneFiles){
+    
+  }else{
+    return(lddmmFile)
+  }
+  
+}
+
+lddmmFilesPruned <- parallel::mclapply(lddmmFiles, pruneFunc, mc.cores = 4)
+lddmmFilesPruned <- unlist(lddmmFilesPruned)
+
+rm(lddmmFiles)
+rm(doneFiles)
+gc()
+
+res <- pbapply::pblapply(lddmmFilesPruned, FUN = analysisFunctionAll)
+
+### Procrustes
+
+#rSPRFunc2
+analysisFunctionProcAll <- function(lddmmFile){
+  tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
+  dimension <- (regmatches(lddmmFile, regexpr("(?<=LDDMMSimRes/).*?(?=Dimension)", lddmmFile, perl = TRUE)))
+  numLandmarks <- as.numeric(regmatches(lddmmFile, regexpr("(?<=LM).*?(?=Alpha)", lddmmFile, perl = TRUE)))
+  alpha <- as.numeric(regmatches(lddmmFile, regexpr("(?<=Alpha).*?(?=Dataset)", lddmmFile, perl = TRUE)))
+  if(dimension == "three"){
+    dimension <- 3
+  }else if(dimension == "two"){
+    dimension <- 2
+  }
+  
+  landmarks <- read.delim(lddmmFile, header = F)
+  cn <- colnames(landmarks)
+  cn[1] <- "label"
+  cn[2] <- "lm"
+  colnames(landmarks) <- cn
+  
+  pcaMat <- matrix(data = NA, nrow = length(unique(landmarks$label)), ncol = dimension * numLandmarks)
+  rownames(pcaMat) = unique(landmarks$label)
+  for(i in unique(landmarks$label)){
+    lm <- as.matrix(filter(landmarks, label == i))
+    lm <- c(lm[, 3:ncol(lm)])
+    for(j in 1:length(lm)){
+      pcaMat[which(rownames(pcaMat)== i), j] = as.numeric(lm[j]) 
+    }
+  }
+  ### gpagen expects an array containing n x d slices where n is num landmarks and d is dimension of ladnmarks
+  
+  pcaMat <- geomorph::arrayspecs(pcaMat, numLandmarks, k = dimension)
+  proc <- geomorph::gpagen(A = pcaMat, verbose = FALSE,print.progress = FALSE)
+  
+  pca <- geomorph::gm.prcomp(proc$coords)
+  
+  pcDistMat<- dist(pca$x)
+  njTree <- nj(pcDistMat)
+  unrootedTree <- unroot(tree)
+  unrootedNJTree <- unroot(njTree)
+  
+  ### this is the expensive step
+  sprd <- rSPRFunc2(unrootedNJTree, unrootedTree)
+  
+  resMat = as.data.frame(matrix(data = NA, nrow = 1, ncol = 6))
+  colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
+  resMat[1,] <- c(dist.topo(unrootedNJTree, unrootedTree), sprd, sprd / Ntip(mast(unrootedNJTree, unrootedTree)),numLandmarks, dimension, alpha)
+  resMat <- as.data.table(resMat)
+  fwrite(resMat, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs/", regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE)), "Procrustes", ".csv", sep = ""))
+  
+  return(resMat)
+}
+
+lddmmFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes",full.names = T)
+doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs")
+
+#prune already analyzed lddmm files
+pruneFunc <- function(lddmmFile){
+  tag <- regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE))
+  tag <- paste(tag, ".csv", sep = "")
+  
+  if(tag %in% doneFiles){
+    
+  }else{
+    return(lddmmFile)
+  }
+  
+}
+
+lddmmFilesPruned <- parallel::mclapply(lddmmFiles, pruneFunc, mc.cores = 4)
+lddmmFilesPruned <- unlist(lddmmFilesPruned)
+
+rm(lddmmFiles)
+rm(doneFiles)
+gc()
+
+res <- pbapply::pblapply(lddmmFilesPruned, FUN = analysisFunctionProcAll)
+
+
+
 ## function to find place in lddmm forward sims
 maxTree <- function(lddmmFile, lm){
   numLandmarks <- as.numeric(regmatches(lddmmFile, regexpr("(?<=LM).*?(?=Alpha)", lddmmFile, perl = TRUE)))
@@ -1222,6 +1406,285 @@ res <- parallel::mclapply(lddmmFiles, function(i){
 
 x <- unlist(res)
 table(x)
+
+
+### efficient LDDMM proc ####
+
+## PC1, 2
+#rSPRFunc3
+analysisFunctionProc <- function(lddmmFile){
+  tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
+  dimension <- (regmatches(lddmmFile, regexpr("(?<=LDDMMSimRes/).*?(?=Dimension)", lddmmFile, perl = TRUE)))
+  numLandmarks <- as.numeric(regmatches(lddmmFile, regexpr("(?<=LM).*?(?=Alpha)", lddmmFile, perl = TRUE)))
+  alpha <- as.numeric(regmatches(lddmmFile, regexpr("(?<=Alpha).*?(?=Dataset)", lddmmFile, perl = TRUE)))
+  if(dimension == "three"){
+    dimension <- 3
+  }else if(dimension == "two"){
+    dimension <- 2
+  }
+  
+  landmarks <- read.delim(lddmmFile, header = F)
+  cn <- colnames(landmarks)
+  cn[1] <- "label"
+  cn[2] <- "lm"
+  colnames(landmarks) <- cn
+  
+  pcaMat <- matrix(data = NA, nrow = length(unique(landmarks$label)), ncol = dimension * numLandmarks)
+  rownames(pcaMat) = unique(landmarks$label)
+  for(i in unique(landmarks$label)){
+    lm <- as.matrix(filter(landmarks, label == i))
+    lm <- c(lm[, 3:ncol(lm)])
+    for(j in 1:length(lm)){
+      pcaMat[which(rownames(pcaMat)== i), j] = as.numeric(lm[j]) 
+    }
+  }
+  ### gpagen expects an array containing n x d slices where n is num landmarks and d is dimension of ladnmarks
+  
+  pcaMat <- geomorph::arrayspecs(pcaMat, numLandmarks, k = dimension)
+  proc <- geomorph::gpagen(A = pcaMat, verbose = FALSE,print.progress = FALSE)
+  
+  pca <- geomorph::gm.prcomp(proc$coords)
+  
+  pcDistMat<- dist(pca$x[,1:2])
+  njTree <- nj(pcDistMat)
+  unrootedTree <- unroot(tree)
+  unrootedNJTree <- unroot(njTree)
+  
+  ### this is the expensive step
+  sprd <- rSPRFunc3(unrootedNJTree, unrootedTree)
+  
+  resMat = as.data.frame(matrix(data = NA, nrow = 1, ncol = 6))
+  colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
+  resMat[1,] <- c(dist.topo(unrootedNJTree, unrootedTree), sprd, sprd / Ntip(mast(unrootedNJTree, unrootedTree)),numLandmarks, dimension, alpha)
+  resMat <- as.data.table(resMat)
+  fwrite(resMat, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/", regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE)), "Procrustes", ".csv", sep = ""))
+  
+  return(resMat)
+}
+#rSPRFunc4
+analysisFunctionProc2 <- function(lddmmFile){
+  tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
+  dimension <- (regmatches(lddmmFile, regexpr("(?<=LDDMMSimRes/).*?(?=Dimension)", lddmmFile, perl = TRUE)))
+  numLandmarks <- as.numeric(regmatches(lddmmFile, regexpr("(?<=LM).*?(?=Alpha)", lddmmFile, perl = TRUE)))
+  alpha <- as.numeric(regmatches(lddmmFile, regexpr("(?<=Alpha).*?(?=Dataset)", lddmmFile, perl = TRUE)))
+  if(dimension == "three"){
+    dimension <- 3
+  }else if(dimension == "two"){
+    dimension <- 2
+  }
+  
+  landmarks <- read.delim(lddmmFile, header = F)
+  cn <- colnames(landmarks)
+  cn[1] <- "label"
+  cn[2] <- "lm"
+  colnames(landmarks) <- cn
+  
+  pcaMat <- matrix(data = NA, nrow = length(unique(landmarks$label)), ncol = dimension * numLandmarks)
+  rownames(pcaMat) = unique(landmarks$label)
+  for(i in unique(landmarks$label)){
+    lm <- as.matrix(filter(landmarks, label == i))
+    lm <- c(lm[, 3:ncol(lm)])
+    for(j in 1:length(lm)){
+      pcaMat[which(rownames(pcaMat)== i), j] = as.numeric(lm[j]) 
+    }
+  }
+  ### gpagen expects an array containing n x d slices where n is num landmarks and d is dimension of ladnmarks
+  
+  pcaMat <- geomorph::arrayspecs(pcaMat, numLandmarks, k = dimension)
+  proc <- geomorph::gpagen(A = pcaMat, verbose = FALSE,print.progress = FALSE)
+  
+  pca <- geomorph::gm.prcomp(proc$coords)
+  
+  pcDistMat<- dist(pca$x[,1:2])
+  njTree <- nj(pcDistMat)
+  unrootedTree <- unroot(tree)
+  unrootedNJTree <- unroot(njTree)
+  
+  ### this is the expensive step
+  sprd <- rSPRFunc4(unrootedNJTree, unrootedTree)
+  
+  resMat = as.data.frame(matrix(data = NA, nrow = 1, ncol = 6))
+  colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
+  resMat[1,] <- c(dist.topo(unrootedNJTree, unrootedTree), sprd, sprd / Ntip(mast(unrootedNJTree, unrootedTree)),numLandmarks, dimension, alpha)
+  resMat <- as.data.table(resMat)
+  fwrite(resMat, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/", regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE)), "Procrustes", ".csv", sep = ""))
+  
+  return(resMat)
+}
+
+lddmmFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes",full.names = T)
+
+doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes")
+
+#prune already analyzed lddmm files
+pruneFunc <- function(lddmmFile){
+  tag <- regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE))
+  tag <- paste(tag, ".csv", sep = "")
+  
+  if(tag %in% doneFiles){
+    
+  }else{
+    return(lddmmFile)
+  }
+  
+}
+
+lddmmFilesPruned <- parallel::mclapply(lddmmFiles, pruneFunc, mc.cores = 4)
+lddmmFilesPruned <- unlist(lddmmFilesPruned)
+
+rm(lddmmFiles)
+rm(doneFiles)
+gc()
+
+data.table::fwrite(lddmmFilesPruned, "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PC1PC2.tsv")
+
+rm(lddmmFilesPruned)
+lddmmFilesPruned <- data.table::fread("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PC1PC2.tsv")
+
+cutoff <-round(length(lddmmFilesPruned)/2)
+lddmmFilesPrunedHalf1 <- lddmmFilesPruned[1:cutoff]
+lddmmFilesPrunedHalf2 <- lddmmFilesPruned[(cutoff + 1) : length(lddmmFilesPruned)]
+
+res <- pbapply::pblapply(lddmmFilesPrunedHalf1, FUN = analysisFunctionProc)
+res <- pbapply::pblapply(lddmmFilesPrunedHalf2, FUN = analysisFunctionProc2)
+
+# PCAll
+#rSPRFunc2
+analysisFunctionProcAll <- function(lddmmFile){
+  tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
+  dimension <- (regmatches(lddmmFile, regexpr("(?<=LDDMMSimRes/).*?(?=Dimension)", lddmmFile, perl = TRUE)))
+  numLandmarks <- as.numeric(regmatches(lddmmFile, regexpr("(?<=LM).*?(?=Alpha)", lddmmFile, perl = TRUE)))
+  alpha <- as.numeric(regmatches(lddmmFile, regexpr("(?<=Alpha).*?(?=Dataset)", lddmmFile, perl = TRUE)))
+  if(dimension == "three"){
+    dimension <- 3
+  }else if(dimension == "two"){
+    dimension <- 2
+  }
+  
+  landmarks <- read.delim(lddmmFile, header = F)
+  cn <- colnames(landmarks)
+  cn[1] <- "label"
+  cn[2] <- "lm"
+  colnames(landmarks) <- cn
+  
+  pcaMat <- matrix(data = NA, nrow = length(unique(landmarks$label)), ncol = dimension * numLandmarks)
+  rownames(pcaMat) = unique(landmarks$label)
+  for(i in unique(landmarks$label)){
+    lm <- as.matrix(filter(landmarks, label == i))
+    lm <- c(lm[, 3:ncol(lm)])
+    for(j in 1:length(lm)){
+      pcaMat[which(rownames(pcaMat)== i), j] = as.numeric(lm[j]) 
+    }
+  }
+  ### gpagen expects an array containing n x d slices where n is num landmarks and d is dimension of ladnmarks
+  
+  pcaMat <- geomorph::arrayspecs(pcaMat, numLandmarks, k = dimension)
+  proc <- geomorph::gpagen(A = pcaMat, verbose = FALSE,print.progress = FALSE)
+  
+  pca <- geomorph::gm.prcomp(proc$coords)
+  
+  pcDistMat<- dist(pca$x)
+  njTree <- nj(pcDistMat)
+  unrootedTree <- unroot(tree)
+  unrootedNJTree <- unroot(njTree)
+  
+  ### this is the expensive step
+  sprd <- rSPRFunc2(unrootedNJTree, unrootedTree)
+  
+  resMat = as.data.frame(matrix(data = NA, nrow = 1, ncol = 6))
+  colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
+  resMat[1,] <- c(dist.topo(unrootedNJTree, unrootedTree), sprd, sprd / Ntip(mast(unrootedNJTree, unrootedTree)),numLandmarks, dimension, alpha)
+  resMat <- as.data.table(resMat)
+  fwrite(resMat, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs/", regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE)), "Procrustes", ".csv", sep = ""))
+  
+  return(resMat)
+}
+#rSPRFunc
+analysisFunctionProcAll2 <- function(lddmmFile){
+  tree <- phyloList[[1+as.numeric(regmatches(lddmmFile, regexpr("(?<=DimensionSimTreeIndex).*?(?=LM)", lddmmFile, perl = TRUE)))]]
+  dimension <- (regmatches(lddmmFile, regexpr("(?<=LDDMMSimRes/).*?(?=Dimension)", lddmmFile, perl = TRUE)))
+  numLandmarks <- as.numeric(regmatches(lddmmFile, regexpr("(?<=LM).*?(?=Alpha)", lddmmFile, perl = TRUE)))
+  alpha <- as.numeric(regmatches(lddmmFile, regexpr("(?<=Alpha).*?(?=Dataset)", lddmmFile, perl = TRUE)))
+  if(dimension == "three"){
+    dimension <- 3
+  }else if(dimension == "two"){
+    dimension <- 2
+  }
+  
+  landmarks <- read.delim(lddmmFile, header = F)
+  cn <- colnames(landmarks)
+  cn[1] <- "label"
+  cn[2] <- "lm"
+  colnames(landmarks) <- cn
+  
+  pcaMat <- matrix(data = NA, nrow = length(unique(landmarks$label)), ncol = dimension * numLandmarks)
+  rownames(pcaMat) = unique(landmarks$label)
+  for(i in unique(landmarks$label)){
+    lm <- as.matrix(filter(landmarks, label == i))
+    lm <- c(lm[, 3:ncol(lm)])
+    for(j in 1:length(lm)){
+      pcaMat[which(rownames(pcaMat)== i), j] = as.numeric(lm[j]) 
+    }
+  }
+  ### gpagen expects an array containing n x d slices where n is num landmarks and d is dimension of ladnmarks
+  
+  pcaMat <- geomorph::arrayspecs(pcaMat, numLandmarks, k = dimension)
+  proc <- geomorph::gpagen(A = pcaMat, verbose = FALSE,print.progress = FALSE)
+  
+  pca <- geomorph::gm.prcomp(proc$coords)
+  
+  pcDistMat<- dist(pca$x)
+  njTree <- nj(pcDistMat)
+  unrootedTree <- unroot(tree)
+  unrootedNJTree <- unroot(njTree)
+  
+  ### this is the expensive step
+  sprd <- rSPRFunc(unrootedNJTree, unrootedTree)
+  
+  resMat = as.data.frame(matrix(data = NA, nrow = 1, ncol = 6))
+  colnames(resMat) <- c("RF", "SPR", "SPRe", "numLandmarks", "Dimension", "alpha")
+  resMat[1,] <- c(dist.topo(unrootedNJTree, unrootedTree), sprd, sprd / Ntip(mast(unrootedNJTree, unrootedTree)),numLandmarks, dimension, alpha)
+  resMat <- as.data.table(resMat)
+  fwrite(resMat, paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs/", regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE)), "Procrustes", ".csv", sep = ""))
+  
+  return(resMat)
+}
+
+lddmmFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes",full.names = T)
+doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs")
+
+#prune already analyzed lddmm files
+pruneFunc <- function(lddmmFile){
+  tag <- regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE))
+  tag <- paste(tag, ".csv", sep = "")
+  
+  if(tag %in% doneFiles){
+    
+  }else{
+    return(lddmmFile)
+  }
+  
+}
+
+lddmmFilesPruned <- parallel::mclapply(lddmmFiles, pruneFunc, mc.cores = 4)
+lddmmFilesPruned <- unlist(lddmmFilesPruned)
+
+rm(lddmmFiles)
+rm(doneFiles)
+gc()
+
+data.table::fwrite(lddmmFilesPruned, "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PCAll.tsv")
+
+rm(lddmmFilesPruned)
+lddmmFilesPruned <- data.table::fread("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PCAll.tsv")
+
+cutoff <-round(length(lddmmFilesPruned)/2)
+lddmmFilesPrunedHalf1 <- lddmmFilesPruned[1:cutoff]
+lddmmFilesPrunedHalf2 <- lddmmFilesPruned[(cutoff + 1) : length(lddmmFilesPruned)]
+
+res <- pbapply::pblapply(lddmmFilesPrunedHalf1, FUN = analysisFunctionProcAll)
+res <- pbapply::pblapply(lddmmFilesPrunedHalf2, FUN = analysisFunctionProcAll2)
+
 
 # # Mongle et al. (2023) dataset --------------------------------------------
 # 
@@ -1678,4 +2141,25 @@ for(i in 1:length(res)){
   }
 }
 colnames(resmat) <- names(res[[i]])
+resmat <- as.data.frame(resmat)
 
+summary(resmat)
+
+table(resmat$SPR)
+100*(table(resmat$SPR)/nrow(resmat))
+
+#proc
+doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/", full.names = T)
+
+res <- parallel::mclapply(doneFiles, data.table::fread, mc.cores = 4)
+
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+
+summary(resmat)
