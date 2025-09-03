@@ -531,3 +531,37 @@ p2
 
 ggsave(paste(output, "examplePCAPlot.svg", sep = ""), p2, width = 10, height = 8)
 
+
+# Figure: LDDMM results ---------------------------------------------------
+pc12 <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/")
+allPCs <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/")
+
+res <- parallel::mclapply(pc12, data.table::fread, mc.cores = 4)
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+resmat <- as.data.frame(resmat)
+summary(resmat)
+saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
+
+
+res <- parallel::mclapply(allPCs, data.table::fread, mc.cores = 4)
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+resmat <- as.data.frame(resmat)
+summary(resmat)
+saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
+
+resPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
+resAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")

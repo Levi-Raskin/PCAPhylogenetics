@@ -1196,7 +1196,7 @@ doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #prune already analyzed lddmm files
 pruneFunc <- function(lddmmFile){
   tag <- regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE))
-  tag <- paste(tag, ".csv", sep = "")
+  tag <- paste(tag, "Procrustes.csv", sep = "")
   
   if(tag %in% doneFiles){
     
@@ -1370,7 +1370,7 @@ doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #prune already analyzed lddmm files
 pruneFunc <- function(lddmmFile){
   tag <- regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE))
-  tag <- paste(tag, ".csv", sep = "")
+  tag <- paste(tag, "Procrustes.csv", sep = "")
   
   if(tag %in% doneFiles){
     
@@ -1519,7 +1519,7 @@ doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #prune already analyzed lddmm files
 pruneFunc <- function(lddmmFile){
   tag <- regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE))
-  tag <- paste(tag, ".csv", sep = "")
+  tag <- paste(tag, "Procrustes.csv", sep = "")
   
   if(tag %in% doneFiles){
     
@@ -1529,17 +1529,18 @@ pruneFunc <- function(lddmmFile){
   
 }
 
-lddmmFilesPruned <- parallel::mclapply(lddmmFiles, pruneFunc, mc.cores = 4)
-lddmmFilesPruned <- unlist(lddmmFilesPruned)
+lddmmFilesPruned <- parallel::mclapply(lddmmFiles, pruneFunc, mc.cores = 8)
+#lddmmFilesPruned <- unlist(lddmmFilesPruned)
 
 rm(lddmmFiles)
 rm(doneFiles)
 gc()
 
-data.table::fwrite(lddmmFilesPruned, "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PC1PC2.tsv")
+data.table::fwrite(lddmmFilesPruned, "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PC1PC2.tsv",col.names = FALSE)
 
 rm(lddmmFilesPruned)
-lddmmFilesPruned <- data.table::fread("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PC1PC2.tsv")
+lddmmFilesPruned <- data.table::fread("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PC1PC2.tsv", header = FALSE)
+lddmmFilesPruned <- unlist(lddmmFilesPruned)
 
 cutoff <-round(length(lddmmFilesPruned)/2)
 lddmmFilesPrunedHalf1 <- lddmmFilesPruned[1:cutoff]
@@ -1656,7 +1657,7 @@ doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/
 #prune already analyzed lddmm files
 pruneFunc <- function(lddmmFile){
   tag <- regmatches(lddmmFile, regexpr("(?<=SimRes/LDDMMSimRes/).*?(?=.tsv)", lddmmFile, perl = TRUE))
-  tag <- paste(tag, ".csv", sep = "")
+  tag <- paste(tag, "Procrustes.csv", sep = "")
   
   if(tag %in% doneFiles){
     
@@ -1667,16 +1668,17 @@ pruneFunc <- function(lddmmFile){
 }
 
 lddmmFilesPruned <- parallel::mclapply(lddmmFiles, pruneFunc, mc.cores = 4)
-lddmmFilesPruned <- unlist(lddmmFilesPruned)
+#lddmmFilesPruned <- unlist(lddmmFilesPruned)
 
 rm(lddmmFiles)
 rm(doneFiles)
 gc()
 
-data.table::fwrite(lddmmFilesPruned, "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PCAll.tsv")
+data.table::fwrite(lddmmFilesPruned, "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PCAll.tsv",col.names = FALSE)
 
 rm(lddmmFilesPruned)
-lddmmFilesPruned <- data.table::fread("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PCAll.tsv")
+lddmmFilesPruned <- data.table::fread("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/PCAll.tsv", header = FALSE)
+lddmmFilesPruned <- unlist(lddmmFilesPruned)
 
 cutoff <-round(length(lddmmFilesPruned)/2)
 lddmmFilesPrunedHalf1 <- lddmmFilesPruned[1:cutoff]
