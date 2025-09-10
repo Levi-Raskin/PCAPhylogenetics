@@ -533,35 +533,103 @@ ggsave(paste(output, "examplePCAPlot.svg", sep = ""), p2, width = 10, height = 8
 
 
 # Figure: LDDMM results ---------------------------------------------------
-pc12 <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/")
-allPCs <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/")
 
-res <- parallel::mclapply(pc12, data.table::fread, mc.cores = 4)
-resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
-for(i in 1:length(res)){
-  resmat[i, ] <- as.numeric(res[[i]])
-  if(i %% 100 == 0 ){
-    print(i)
-  }
-}
-colnames(resmat) <- names(res[[i]])
-resmat <- as.data.frame(resmat)
-summary(resmat)
-saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
-
-
-res <- parallel::mclapply(allPCs, data.table::fread, mc.cores = 4)
-resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
-for(i in 1:length(res)){
-  resmat[i, ] <- as.numeric(res[[i]])
-  if(i %% 100 == 0 ){
-    print(i)
-  }
-}
-colnames(resmat) <- names(res[[i]])
-resmat <- as.data.frame(resmat)
-summary(resmat)
-saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
+# pc12 <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/")
+# res <- parallel::mclapply(pc12, function(i){
+#   return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/", i, sep = "")))
+#   }, mc.cores = 10)
+# resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+# for(i in 1:length(res)){
+#   resmat[i, ] <- as.numeric(res[[i]])
+#   if(i %% 100 == 0 ){
+#     print(i)
+#   }
+# }
+# colnames(resmat) <- names(res[[i]])
+# resmat <- as.data.frame(resmat)
+# summary(resmat)
+# saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
+# 
+# allPCs <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/")
+# res <- parallel::mclapply(allPCs, function(i){
+#   return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/", i, sep = "")))
+# }, mc.cores = 10)
+# resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+# for(i in 1:length(res)){
+#   resmat[i, ] <- as.numeric(res[[i]])
+#   if(i %% 100 == 0 ){
+#     print(i)
+#   }
+# }
+# colnames(resmat) <- names(res[[i]])
+# resmat <- as.data.frame(resmat)
+# summary(resmat)
+# saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
 
 resPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
 resAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
+
+resPC1PC2$numLandmarks <- as.factor(resPC1PC2$numLandmarks)
+resPC1PC2$Dimension <- as.factor(resPC1PC2$Dimension)
+resPC1PC2$alpha <- as.factor(resPC1PC2$alpha)
+
+## 3d vs. 2d
+n_colors <- length(unique(resPC1PC2$alpha))
+blue_colors <- brewer.pal(max(3, n_colors + 2), "Blues")[(3):(n_colors + 2)]  # Skip first 2 colors
+red_colors <- brewer.pal(max(3, n_colors + 2), "Reds")[(3):(n_colors + 2)]  # Skip first 2 colors
+
+p1 <- ggplot() +
+  geom_half_violin(data = filter(resPC1PC2, Dimension == 2),
+                   aes(x = numLandmarks, y = SPR, fill = alpha), side = "r", scale = "width")+
+  scale_fill_manual(name = "Rate (2D data)", values = blue_colors) +
+  new_scale_fill()+
+  geom_half_violin(data = filter(resPC1PC2, Dimension == 3),
+                   aes(x = numLandmarks, y = SPR, fill = alpha), side = "l", scale = "width")+
+  scale_fill_manual(name = "Rate (3D data)", values = red_colors) +
+  new_scale_fill()+
+  scale_y_continuous(breaks = 0:14, limits = c(0, 14), expand = expansion(0)) +
+  xlab(NULL)+
+  theme_minimal() +
+  theme(legend.position = "right",
+        panel.grid.minor = element_blank())
+p1
+
+ggsave(paste(output, "PC1PC2SPRDist.svg", sep = ""), p1, width = 10, height = 5)
+
+
+
+#procrustes
+pc12 <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/")
+res <- parallel::mclapply(pc12, function(i){
+  return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/", i, sep = "")))
+  }, mc.cores = 10)
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+resmat <- as.data.frame(resmat)
+summary(resmat)
+saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPC12results.rds")
+
+allPCs <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs/")
+res <- parallel::mclapply(allPCs, function(i){
+  return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs/", i, sep = "")))
+}, mc.cores = 10)
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+resmat <- as.data.frame(resmat)
+summary(resmat)
+saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPCallresults.rds")
+
+resProcPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPC12results.rds")
+resProcAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPCallresults.rds")
