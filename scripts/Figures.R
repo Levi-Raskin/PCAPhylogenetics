@@ -633,3 +633,28 @@ saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/M
 
 resProcPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPC12results.rds")
 resProcAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPCallresults.rds")
+
+
+# tree cloud --------------------------------------------------------------
+
+for(i in 1:10){
+  tree <- rtree(6, rooted = TRUE, tip.label = c(
+    "H. ergaster",
+    "H. habilis",
+    "Au. afarensis",
+    "Au. anamensis",
+    "Ar. ramidus",
+    "S. tchadensis"
+  ))
+  p1 <- ggtree(tree)+
+    geom_tiplab(fontface = 4)+
+    xlim(NA, 5)
+  p1
+  ggsave(filename = paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/manuscript/figures/treeCloud/tree", 
+                          i,
+                          ".svg",
+                          sep = ""),
+        p1,
+        width = 5,
+        height = 5)
+}

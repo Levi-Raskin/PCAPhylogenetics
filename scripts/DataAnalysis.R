@@ -2130,38 +2130,160 @@ for(c in nc){
 }
 
 # LDDMM analysis ----------------------------------------------------------
-#unaligned
-doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances", full.names = T)
 
-res <- parallel::mclapply(doneFiles, data.table::fread, mc.cores = 4)
+resPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
+resAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
+resProcPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPC12results.rds")
+resProcAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPCallresults.rds")
 
-resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
-for(i in 1:length(res)){
-  resmat[i, ] <- as.numeric(res[[i]])
-  if(i %% 100 == 0 ){
-    print(i)
-  }
-}
-colnames(resmat) <- names(res[[i]])
-resmat <- as.data.frame(resmat)
+sum(resPC1PC2$RF == 0) / nrow(resPC1PC2)
+sum(resPC1PC2$RF == 0)
+summary(resPC1PC2$RF)
+summary(resPC1PC2$SPR)
 
-summary(resmat)
+sum(resAll$RF == 0) / nrow(resAll)
+sum(resAll$RF == 0)
+summary(resAll$RF)
+summary(resAll$SPR)
 
-table(resmat$SPR)
-100*(table(resmat$SPR)/nrow(resmat))
+wilcox.test(filter(resPC1PC2, numLandmarks == 10)$SPR, filter(resPC1PC2, numLandmarks == 25)$SPR)
+mean(filter(resPC1PC2, numLandmarks == 10)$SPR)
+mean(filter(resPC1PC2, numLandmarks == 25)$SPR)
 
-#proc
-doneFiles <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/", full.names = T)
+wilcox.test(filter(resPC1PC2, numLandmarks == 25)$SPR, filter(resPC1PC2, numLandmarks == 50)$SPR)
+mean(filter(resPC1PC2, numLandmarks == 25)$SPR)
+mean(filter(resPC1PC2, numLandmarks == 50)$SPR)
 
-res <- parallel::mclapply(doneFiles, data.table::fread, mc.cores = 4)
+wilcox.test(filter(resPC1PC2, numLandmarks == 10)$SPR, filter(resPC1PC2, numLandmarks == 50)$SPR)
+mean(filter(resPC1PC2, numLandmarks == 10)$SPR)
+mean(filter(resPC1PC2, numLandmarks == 50)$SPR)
 
-resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
-for(i in 1:length(res)){
-  resmat[i, ] <- as.numeric(res[[i]])
-  if(i %% 100 == 0 ){
-    print(i)
-  }
-}
-colnames(resmat) <- names(res[[i]])
+wilcox.test(filter(resAll, numLandmarks == 10)$SPR, filter(resAll, numLandmarks == 25)$SPR)
+mean(filter(resAll, numLandmarks == 10)$SPR)
+mean(filter(resAll, numLandmarks == 25)$SPR)
 
-summary(resmat)
+wilcox.test(filter(resAll, numLandmarks == 25)$SPR, filter(resAll, numLandmarks == 50)$SPR)
+mean(filter(resAll, numLandmarks == 25)$SPR)
+mean(filter(resAll, numLandmarks == 50)$SPR)
+
+wilcox.test(filter(resAll, numLandmarks == 10)$SPR, filter(resAll, numLandmarks == 50)$SPR)
+mean(filter(resAll, numLandmarks == 10)$SPR)
+mean(filter(resAll, numLandmarks == 50)$SPR)
+
+
+wilcox.test(filter(resPC1PC2, numLandmarks == 10)$RF, filter(resPC1PC2, numLandmarks == 25)$RF)
+mean(filter(resPC1PC2, numLandmarks == 10)$RF)
+mean(filter(resPC1PC2, numLandmarks == 25)$RF)
+
+wilcox.test(filter(resPC1PC2, numLandmarks == 25)$RF, filter(resPC1PC2, numLandmarks == 50)$RF)
+mean(filter(resPC1PC2, numLandmarks == 25)$RF)
+mean(filter(resPC1PC2, numLandmarks == 50)$RF)
+
+wilcox.test(filter(resPC1PC2, numLandmarks == 10)$RF, filter(resPC1PC2, numLandmarks == 50)$RF)
+mean(filter(resPC1PC2, numLandmarks == 10)$RF)
+mean(filter(resPC1PC2, numLandmarks == 50)$RF)
+
+wilcox.test(filter(resAll, numLandmarks == 10)$RF, filter(resAll, numLandmarks == 25)$RF)
+mean(filter(resAll, numLandmarks == 10)$RF)
+mean(filter(resAll, numLandmarks == 25)$RF)
+
+wilcox.test(filter(resAll, numLandmarks == 25)$RF, filter(resAll, numLandmarks == 50)$RF)
+mean(filter(resAll, numLandmarks == 25)$RF)
+mean(filter(resAll, numLandmarks == 50)$RF)
+
+wilcox.test(filter(resAll, numLandmarks == 10)$RF, filter(resAll, numLandmarks == 50)$RF)
+mean(filter(resAll, numLandmarks == 10)$RF)
+mean(filter(resAll, numLandmarks == 50)$RF)
+
+wilcox.test(filter(resPC1PC2, Dimension == 2)$SPR, filter(resPC1PC2, Dimension == 3)$SPR)
+mean(filter(resPC1PC2, Dimension == 2)$SPR)
+mean(filter(resPC1PC2, Dimension == 3)$SPR)
+
+wilcox.test(filter(resAll, Dimension == 2)$SPR, filter(resAll, Dimension == 3)$SPR)
+mean(filter(resAll, Dimension == 2)$SPR)
+mean(filter(resAll, Dimension == 3)$SPR)
+
+wilcox.test(filter(resPC1PC2, Dimension == 2)$RF, filter(resPC1PC2, Dimension == 3)$RF)
+mean(filter(resPC1PC2, Dimension == 2)$RF)
+mean(filter(resPC1PC2, Dimension == 3)$RF)
+
+wilcox.test(filter(resAll, Dimension == 2)$RF, filter(resAll, Dimension == 3)$RF)
+mean(filter(resAll, Dimension == 2)$RF)
+mean(filter(resAll, Dimension == 3)$RF)
+
+
+sum(resProcPC1PC2$RF == 0) / nrow(resProcPC1PC2)
+sum(resProcPC1PC2$RF == 0)
+summary(resProcPC1PC2$RF)
+summary(resProcPC1PC2$SPR)
+
+sum(resProcAll$RF == 0) / nrow(resProcAll)
+sum(resProcAll$RF == 0)
+summary(resProcAll$RF)
+summary(resProcAll$SPR)
+
+wilcox.test(filter(resProcPC1PC2, numLandmarks == 10)$SPR, filter(resProcPC1PC2, numLandmarks == 25)$SPR)
+mean(filter(resProcPC1PC2, numLandmarks == 10)$SPR)
+mean(filter(resProcPC1PC2, numLandmarks == 25)$SPR)
+
+wilcox.test(filter(resProcPC1PC2, numLandmarks == 25)$SPR, filter(resProcPC1PC2, numLandmarks == 50)$SPR)
+mean(filter(resProcPC1PC2, numLandmarks == 25)$SPR)
+mean(filter(resProcPC1PC2, numLandmarks == 50)$SPR)
+
+wilcox.test(filter(resProcPC1PC2, numLandmarks == 10)$SPR, filter(resProcPC1PC2, numLandmarks == 50)$SPR)
+mean(filter(resProcPC1PC2, numLandmarks == 10)$SPR)
+mean(filter(resProcPC1PC2, numLandmarks == 50)$SPR)
+
+wilcox.test(filter(resProcAll, numLandmarks == 10)$SPR, filter(resProcAll, numLandmarks == 25)$SPR)
+mean(filter(resProcAll, numLandmarks == 10)$SPR)
+mean(filter(resProcAll, numLandmarks == 25)$SPR)
+
+wilcox.test(filter(resProcAll, numLandmarks == 25)$SPR, filter(resProcAll, numLandmarks == 50)$SPR)
+mean(filter(resProcAll, numLandmarks == 25)$SPR)
+mean(filter(resProcAll, numLandmarks == 50)$SPR)
+
+wilcox.test(filter(resProcAll, numLandmarks == 10)$SPR, filter(resProcAll, numLandmarks == 50)$SPR)
+mean(filter(resProcAll, numLandmarks == 10)$SPR)
+mean(filter(resProcAll, numLandmarks == 50)$SPR)
+
+
+wilcox.test(filter(resProcPC1PC2, numLandmarks == 10)$RF, filter(resProcPC1PC2, numLandmarks == 25)$RF)
+mean(filter(resProcPC1PC2, numLandmarks == 10)$RF)
+mean(filter(resProcPC1PC2, numLandmarks == 25)$RF)
+
+wilcox.test(filter(resProcPC1PC2, numLandmarks == 25)$RF, filter(resProcPC1PC2, numLandmarks == 50)$RF)
+mean(filter(resProcPC1PC2, numLandmarks == 25)$RF)
+mean(filter(resProcPC1PC2, numLandmarks == 50)$RF)
+
+wilcox.test(filter(resProcPC1PC2, numLandmarks == 10)$RF, filter(resProcPC1PC2, numLandmarks == 50)$RF)
+mean(filter(resProcPC1PC2, numLandmarks == 10)$RF)
+mean(filter(resProcPC1PC2, numLandmarks == 50)$RF)
+
+wilcox.test(filter(resProcAll, numLandmarks == 10)$RF, filter(resProcAll, numLandmarks == 25)$RF)
+mean(filter(resProcAll, numLandmarks == 10)$RF)
+mean(filter(resProcAll, numLandmarks == 25)$RF)
+
+wilcox.test(filter(resProcAll, numLandmarks == 25)$RF, filter(resProcAll, numLandmarks == 50)$RF)
+mean(filter(resProcAll, numLandmarks == 25)$RF)
+mean(filter(resProcAll, numLandmarks == 50)$RF)
+
+wilcox.test(filter(resProcAll, numLandmarks == 10)$RF, filter(resProcAll, numLandmarks == 50)$RF)
+mean(filter(resProcAll, numLandmarks == 10)$RF)
+mean(filter(resProcAll, numLandmarks == 50)$RF)
+
+wilcox.test(filter(resProcPC1PC2, Dimension == 2)$SPR, filter(resProcPC1PC2, Dimension == 3)$SPR)
+mean(filter(resProcPC1PC2, Dimension == 2)$SPR)
+mean(filter(resProcPC1PC2, Dimension == 3)$SPR)
+
+wilcox.test(filter(resProcAll, Dimension == 2)$SPR, filter(resProcAll, Dimension == 3)$SPR)
+mean(filter(resProcAll, Dimension == 2)$SPR)
+mean(filter(resProcAll, Dimension == 3)$SPR)
+
+wilcox.test(filter(resProcPC1PC2, Dimension == 2)$RF, filter(resProcPC1PC2, Dimension == 3)$RF)
+mean(filter(resProcPC1PC2, Dimension == 2)$RF)
+mean(filter(resProcPC1PC2, Dimension == 3)$RF)
+
+wilcox.test(filter(resProcAll, Dimension == 2)$RF, filter(resProcAll, Dimension == 3)$RF)
+mean(filter(resProcAll, Dimension == 2)$RF)
+mean(filter(resProcAll, Dimension == 3)$RF)
+
