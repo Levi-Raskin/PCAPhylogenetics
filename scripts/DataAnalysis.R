@@ -65,7 +65,6 @@ rSPRFunc4 <- function(tree1, tree2){
   return(as.integer(nums))
 }
 
-
 sprMast <- function(tree1, tree2){
   sprDist <- rSPRFunc(tree1, tree2)
   mastSize <- Ntip(phangorn::mast(tree1, tree2))
@@ -2287,3 +2286,33 @@ wilcox.test(filter(resProcAll, Dimension == 2)$RF, filter(resProcAll, Dimension 
 mean(filter(resProcAll, Dimension == 2)$RF)
 mean(filter(resProcAll, Dimension == 3)$RF)
 
+
+
+# Psuedo-random null dists ----------------------------------------------
+library(doParallel)
+library(foreach)
+
+n <- 10000
+
+numCores <- 4
+cl <- makeCluster(numCores)
+registerDoParallel(cl)
+
+distMat <- foreach(i = 1:n, .combine = rbind, .packages = "ape") %dopar% {
+  t0 <- ape::rtree(21, rooted = FALSE)
+  t1 <- ape::rtree(21, rooted = FALSE)
+  rf <- dist.topo(t0, t1)
+  
+  spr <- switch((i %% 4) + 1,
+                rSPRFunc(t0, t1),
+                rSPRFunc2(t0, t1),
+                rSPRFunc3(t0, t1),
+                rSPRFunc4(t0, t1)
+  )
+  
+  c(rf, spr)
+}
+stopCluster(cl)
+colnames(distMat) <- c("RF", "SPR")
+
+write.csv(distMat, file = "results/Mongle_et_al_2023_RB/nullDistribution.csv")
