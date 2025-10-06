@@ -2289,30 +2289,43 @@ mean(filter(resProcAll, Dimension == 3)$RF)
 
 
 # Psuedo-random null dists ----------------------------------------------
-library(doParallel)
-library(foreach)
+# library(doParallel)
+# library(foreach)
+# 
+# n <- 10000
+# 
+# numCores <- 4
+# cl <- makeCluster(numCores)
+# registerDoParallel(cl)
+# 
+# distMat <- foreach(i = 1:n, .combine = rbind, .packages = "ape") %dopar% {
+#   t0 <- ape::rtree(21, rooted = FALSE)
+#   t1 <- ape::rtree(21, rooted = FALSE)
+#   rf <- dist.topo(t0, t1)
+#   
+#   spr <- switch((i %% 4) + 1,
+#                 rSPRFunc(t0, t1),
+#                 rSPRFunc2(t0, t1),
+#                 rSPRFunc3(t0, t1),
+#                 rSPRFunc4(t0, t1)
+#   )
+#   
+#   c(rf, spr)
+# }
+# stopCluster(cl)
+# colnames(distMat) <- c("RF", "SPR")
+# 
+# write.csv(distMat, file = "results/Mongle_et_al_2023_RB/nullDistribution.csv")
 
-n <- 10000
-
-numCores <- 4
-cl <- makeCluster(numCores)
-registerDoParallel(cl)
-
-distMat <- foreach(i = 1:n, .combine = rbind, .packages = "ape") %dopar% {
-  t0 <- ape::rtree(21, rooted = FALSE)
-  t1 <- ape::rtree(21, rooted = FALSE)
-  rf <- dist.topo(t0, t1)
-  
-  spr <- switch((i %% 4) + 1,
-                rSPRFunc(t0, t1),
-                rSPRFunc2(t0, t1),
-                rSPRFunc3(t0, t1),
-                rSPRFunc4(t0, t1)
-  )
-  
-  c(rf, spr)
+distMat <- read.csv("results/Mongle_et_al_2023_RB/nullDistribution.csv")[,2:3]
+rfPVal <- function(val){
+  p <-sum(abs(distMat[,1] - median(distMat[,1])) >= abs(val - median(distMat[,1]))) / length(distMat[,1])
+  return(p)
 }
-stopCluster(cl)
-colnames(distMat) <- c("RF", "SPR")
+sprPVal <- function(val){
+  p <-sum(abs(distMat[,2] - median(distMat[,2])) >= abs(val - median(distMat[,2]))) / length(distMat[,2])
+  return(p)
+}
 
-write.csv(distMat, file = "results/Mongle_et_al_2023_RB/nullDistribution.csv")
+sprPVal(10)
+rfPVal(32)
