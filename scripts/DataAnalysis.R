@@ -2006,7 +2006,8 @@ for(c in nc){
       varRatesLG <- FALSE
     }
     
-    print(paste("p =", wilcox.test(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$SPR, filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$SPR)$p.value))
+    print(paste("p =", wilcox.test(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$RF, filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$RF)$p.value))
+    print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, setRate == r, propConflicting ==0)$RF, filter(concatDFPC1PC2, numCharacters == c, varRateExpectation == r, propConflicting ==0)$RF))
     print("------------------------------")
   }
 }
@@ -2030,6 +2031,7 @@ for(c in nc){
     print("------------------------------")
   }
 }
+
 #RF
 nc <- unique(concatDFAll$numCharacters)
 rate <- c(0.1, 1, 10)
@@ -2050,71 +2052,80 @@ for(c in nc){
   }
 }
 
-
-
+#SPR
 nc <- unique(concatDFPC1PC2$numCharacters)
 pc <- unique(concatDFPC1PC2$propConflicting)
 meanDiff <- c()
 for(c in nc){
-  for(p in 2:length(pc)){
+  for(p in pc){
     print(paste(c,"characters"))
-    print(paste("Mean for pc:", pc[p]))
-    print(mean(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p])$SPR))
-    print(paste("Mean for pc: ", pc[p-1]))
-    print(mean(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p-1])$SPR))
-    
-    print(paste("p =", wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p])$SPR, filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p-1])$SPR)$p.value))
-    print("------------------------------")
+    print(paste("Mean for pc:", p))
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==p)$SPR))
   }
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==0)$SPR, filter(concatDFPC1PC2, numCharacters == c, propConflicting ==0.1)$SPR))
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.25)$SPR, filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.1)$SPR))
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==0.5)$SPR, filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.1)$SPR))
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.5)$SPR, filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.25)$SPR))
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0)$SPR, filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.25)$SPR))
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0)$SPR, filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.5)$SPR))
+  print("------------------------------")
 }
-
+#SPR
 nc <- unique(concatDFAll$numCharacters)
 pc <- unique(concatDFAll$propConflicting)
 meanDiff <- c()
 for(c in nc){
-  for(p in 2:length(pc)){
+  for(p in pc){
     print(paste(c,"characters"))
-    print(paste("Mean for pc:", pc[p]))
-    print(mean(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p])$SPR))
-    print(paste("Mean for pc: ", pc[p-1]))
-    print(mean(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p-1])$SPR))
-    
-    print(paste("p =", wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p])$SPR, filter(concatDFAll, numCharacters == c, propConflicting ==pc[p-1])$SPR)$p.value))
-    print("------------------------------")
+    print(paste("Mean for pc:", p))
+    print(mean(filter(concatDFAll, numCharacters == c, propConflicting ==p)$SPR))
   }
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting ==0)$SPR, filter(concatDFAll, numCharacters == c, propConflicting ==0.1)$SPR))
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting == 0.25)$SPR, filter(concatDFAll, numCharacters == c, propConflicting == 0.1)$SPR))
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting ==0.5)$SPR, filter(concatDFAll, numCharacters == c, propConflicting == 0.1)$SPR))
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting == 0.5)$SPR, filter(concatDFAll, numCharacters == c, propConflicting == 0.25)$SPR))
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting == 0)$SPR, filter(concatDFAll, numCharacters == c, propConflicting == 0.25)$SPR))
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting == 0)$SPR, filter(concatDFAll, numCharacters == c, propConflicting == 0.5)$SPR))
+  print("------------------------------")
 }
 
+#RF
 nc <- unique(concatDFPC1PC2$numCharacters)
 pc <- unique(concatDFPC1PC2$propConflicting)
 meanDiff <- c()
 for(c in nc){
-  for(p in 2:length(pc)){
+  for(p in pc){
     print(paste(c,"characters"))
-    print(paste("Mean for pc:", pc[p]))
-    print(mean(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p])$RF))
-    print(paste("Mean for pc: ", pc[p-1]))
-    print(mean(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p-1])$RF))
-    
-    print(paste("p =", wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p])$RF, filter(concatDFPC1PC2, numCharacters == c, propConflicting ==pc[p-1])$RF)$p.value))
-    print("------------------------------")
+    print(paste("Mean for pc:", p))
+    print(mean(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==p)$RF))
   }
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==0)$RF, filter(concatDFPC1PC2, numCharacters == c, propConflicting ==0.1)$RF))
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.25)$RF, filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.1)$RF))
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting ==0.5)$RF, filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.1)$RF))
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.5)$RF, filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.25)$RF))
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0)$RF, filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.25)$RF))
+  print(wilcox.test(filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0)$RF, filter(concatDFPC1PC2, numCharacters == c, propConflicting == 0.5)$RF))
+  print("------------------------------")
 }
-
+#RF
 nc <- unique(concatDFAll$numCharacters)
 pc <- unique(concatDFAll$propConflicting)
 meanDiff <- c()
 for(c in nc){
-  for(p in 2:length(pc)){
+  for(p in pc){
     print(paste(c,"characters"))
-    print(paste("Mean for pc:", pc[p]))
-    print(mean(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p])$RF))
-    print(paste("Mean for pc: ", pc[p-1]))
-    print(mean(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p-1])$RF))
-    
-    print(paste("p =", wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting ==pc[p])$RF, filter(concatDFAll, numCharacters == c, propConflicting ==pc[p-1])$RF)$p.value))
-    print("------------------------------")
+    print(paste("Mean for pc:", p))
+    print(mean(filter(concatDFAll, numCharacters == c, propConflicting ==p)$RF))
   }
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting ==0)$RF, filter(concatDFAll, numCharacters == c, propConflicting ==0.1)$RF))
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting == 0.25)$RF, filter(concatDFAll, numCharacters == c, propConflicting == 0.1)$RF))
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting ==0.5)$RF, filter(concatDFAll, numCharacters == c, propConflicting == 0.1)$RF))
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting == 0.5)$RF, filter(concatDFAll, numCharacters == c, propConflicting == 0.25)$RF))
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting == 0)$RF, filter(concatDFAll, numCharacters == c, propConflicting == 0.25)$RF))
+  print(wilcox.test(filter(concatDFAll, numCharacters == c, propConflicting == 0)$RF, filter(concatDFAll, numCharacters == c, propConflicting == 0.5)$RF))
+  print("------------------------------")
 }
+
 
 nc <- unique(concatDFPC1PC2$numCharacters)
 for(c in nc){
@@ -2244,7 +2255,6 @@ mean(filter(resProcAll, numLandmarks == 50)$SPR)
 wilcox.test(filter(resProcAll, numLandmarks == 10)$SPR, filter(resProcAll, numLandmarks == 50)$SPR)
 mean(filter(resProcAll, numLandmarks == 10)$SPR)
 mean(filter(resProcAll, numLandmarks == 50)$SPR)
-
 
 wilcox.test(filter(resProcPC1PC2, numLandmarks == 10)$RF, filter(resProcPC1PC2, numLandmarks == 25)$RF)
 mean(filter(resProcPC1PC2, numLandmarks == 10)$RF)
