@@ -658,3 +658,132 @@ for(i in 1:10){
         width = 5,
         height = 5)
 }
+
+# Figure: BM continuous traits line plot --------------------------------------------
+
+simResPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
+simRes2550PC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults25char50char.rds")
+simRes500PC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults500char.rds")
+
+simResPC1PC2 <- c(simResPC1PC2, simRes2550PC1PC2, simRes500PC1PC2)
+
+for(i in 1:length(simResPC1PC2)){
+  if(i == 1){
+    concatDF <- simResPC1PC2[[1]]$resMat
+  }else{
+    concatDF <- rbind(concatDF, simResPC1PC2[[i]]$resMat)
+  }
+  if(i %% 100 == 0){
+    print(i)
+  }
+}
+concatDF$numCharacters <- as.factor(concatDF$numCharacters)
+concatDF$setRate <- as.factor(concatDF$setRate)
+concatDF$propConflicting <- as.factor(concatDF$propConflicting)
+concatDF$varRateExpectation <- concatDF$variableRateShape / concatDF$variableRateScale
+concatDF$varRateExpectation <- as.factor(concatDF$varRateExpectation)
+
+
+## set rate vs. variable rates
+n_colors <- length(unique(concatDF$setRate))  # Adjust based on your data
+blue_colors <- brewer.pal(max(3, n_colors + 2), "Blues")[(3):(n_colors + 2)]  # Skip first 2 colors
+red_colors <- brewer.pal(max(3, n_colors + 2), "Reds")[(3):(n_colors + 2)]  # Skip first 2 colors
+
+p1 <- ggplot() +
+  geom_half_boxplot(data = filter(concatDF, is.na(varRateExpectation)),
+                   aes(x = numCharacters, y = SPR, fill = setRate), side = "r")+
+  scale_fill_manual(name = "Set rate", values = blue_colors) +
+  new_scale_fill()+
+  geom_half_boxplot(data = filter(concatDF, is.na(setRate)),
+                   aes(x = numCharacters, y = SPR, fill = varRateExpectation), side = "l")+
+  scale_fill_manual(name = "Variable rates", values = red_colors) +
+  new_scale_fill()+
+  scale_y_continuous(breaks = 0:13) +
+  xlab(NULL)+
+  theme_minimal() +
+  theme(legend.position = "right",
+        panel.grid.minor = element_blank())
+p1
+
+n_colors <- length(unique(concatDF$propConflicting))
+blue_colors <- brewer.pal(max(3, n_colors + 2), "Greens")[(3):(n_colors + 2)] 
+p2 <- ggplot() +
+  geom_boxplot(data = concatDF,
+              aes(x = numCharacters, y = SPR, fill = propConflicting), staplewidth = 0.5)+
+  scale_fill_manual(name = "% traits conflicting", values = blue_colors) +
+  scale_y_continuous(breaks = 0:13) +
+  xlab("Number of characters")+
+  theme_minimal() +
+  theme(legend.position = "right",
+        panel.grid.minor = element_blank())
+p2
+
+p3 <- p1 / p2
+p3
+
+ggsave(paste(output, "varRateSetRateConflictingFigurePC1PC2BoxPlot.svg", sep = ""), p3, width = 10, height = 10)
+
+
+# Figure: LDDMM results line plot ---------------------------------------------------
+
+# pc12 <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/")
+# res <- parallel::mclapply(pc12, function(i){
+#   return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/", i, sep = "")))
+#   }, mc.cores = 10)
+# resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+# for(i in 1:length(res)){
+#   resmat[i, ] <- as.numeric(res[[i]])
+#   if(i %% 100 == 0 ){
+#     print(i)
+#   }
+# }
+# colnames(resmat) <- names(res[[i]])
+# resmat <- as.data.frame(resmat)
+# summary(resmat)
+# saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
+# 
+# allPCs <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/")
+# res <- parallel::mclapply(allPCs, function(i){
+#   return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/", i, sep = "")))
+# }, mc.cores = 10)
+# resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+# for(i in 1:length(res)){
+#   resmat[i, ] <- as.numeric(res[[i]])
+#   if(i %% 100 == 0 ){
+#     print(i)
+#   }
+# }
+# colnames(resmat) <- names(res[[i]])
+# resmat <- as.data.frame(resmat)
+# summary(resmat)
+# saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
+
+resPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
+resAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
+
+resPC1PC2$numLandmarks <- as.factor(resPC1PC2$numLandmarks)
+resPC1PC2$Dimension <- as.factor(resPC1PC2$Dimension)
+resPC1PC2$alpha <- as.factor(resPC1PC2$alpha)
+
+## 3d vs. 2d
+n_colors <- length(unique(resPC1PC2$alpha))
+blue_colors <- brewer.pal(max(3, n_colors + 2), "Blues")[(3):(n_colors + 2)]  # Skip first 2 colors
+red_colors <- brewer.pal(max(3, n_colors + 2), "Reds")[(3):(n_colors + 2)]  # Skip first 2 colors
+
+p1 <- ggplot() +
+  geom_half_boxplot(data = filter(resPC1PC2, Dimension == 2),
+                   aes(x = numLandmarks, y = SPR, fill = alpha), side = "r")+
+  scale_fill_manual(name = "Rate (2D data)", values = blue_colors) +
+  new_scale_fill()+
+  geom_half_boxplot(data = filter(resPC1PC2, Dimension == 3),
+                   aes(x = numLandmarks, y = SPR, fill = alpha), side = "l")+
+  scale_fill_manual(name = "Rate (3D data)", values = red_colors) +
+  new_scale_fill()+
+  scale_y_continuous(breaks = 0:15, limits = c(0, 15), expand = expansion(0)) +
+  xlab(NULL)+
+  theme_minimal() +
+  theme(legend.position = "right",
+        panel.grid.minor = element_blank())
+p1
+
+ggsave(paste(output, "PC1PC2SPRDistBoxPlot.svg", sep = ""), p1, width = 10, height = 5)
