@@ -173,7 +173,7 @@ ggsave(paste(output, "fig1LDDMMAlpha0.4.svg", sep = ""),
 
 
 ### 3D
-lddmmRes1Alpha0.2 <- read.delim("resultsGit//threeDimensionSimTreeIndex0LM10Alpha0.100000Dataset1nodeShapes.tsv", header = FALSE)
+lddmmRes1Alpha0.2 <- read.delim("resultsGit/threeDimensionSimTreeIndex0LM10Alpha0.100000Dataset1nodeShapes.tsv", header = FALSE)
 colnames(lddmmRes1Alpha0.2) <- c("taxon", "id", "x", "y", "z")
 lddmmRes1Alpha0.2$taxon <- gsub("_", lddmmRes1Alpha0.2$taxon, replacement = " ")
 
@@ -319,7 +319,7 @@ ggsave(filename = paste(output, "3Dfig1LDDMMAlpha01.svg", sep = ""),
 
 
 
-lddmmRes1Alpha0.2 <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes/threeDimensionSimTreeIndex0LM10Alpha0.200000Dataset1nodeShapes.tsv", header = FALSE)
+lddmmRes1Alpha0.2 <- read.delim("resultsGit/threeDimensionSimTreeIndex0LM10Alpha0.200000Dataset1nodeShapes.tsv", header = FALSE)
 colnames(lddmmRes1Alpha0.2) <- c("taxon", "id", "x", "y", "z")
 lddmmRes1Alpha0.2$taxon <- gsub("_", lddmmRes1Alpha0.2$taxon, replacement = " ")
 
@@ -341,7 +341,7 @@ ggsave(filename = paste(output, "3Dfig1LDDMMAlpha02.svg", sep = ""),
        height = 42)
 
 
-lddmmRes1Alpha0.2 <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes/threeDimensionSimTreeIndex0LM10Alpha0.300000Dataset1nodeShapes.tsv", header = FALSE)
+lddmmRes1Alpha0.2 <- read.delim("resultsGit/threeDimensionSimTreeIndex0LM10Alpha0.300000Dataset1nodeShapes.tsv", header = FALSE)
 colnames(lddmmRes1Alpha0.2) <- c("taxon", "id", "x", "y", "z")
 lddmmRes1Alpha0.2$taxon <- gsub("_", lddmmRes1Alpha0.2$taxon, replacement = " ")
 
@@ -363,7 +363,7 @@ ggsave(filename = paste(output, "3Dfig1LDDMMAlpha03.svg", sep = ""),
        height = 42)
 
 
-lddmmRes1Alpha0.2 <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes/threeDimensionSimTreeIndex0LM10Alpha0.400000Dataset1nodeShapes.tsv", header = FALSE)
+lddmmRes1Alpha0.2 <- read.delim("resultsGit/threeDimensionSimTreeIndex0LM10Alpha0.400000Dataset1nodeShapes.tsv", header = FALSE)
 colnames(lddmmRes1Alpha0.2) <- c("taxon", "id", "x", "y", "z")
 lddmmRes1Alpha0.2$taxon <- gsub("_", lddmmRes1Alpha0.2$taxon, replacement = " ")
 
@@ -386,9 +386,9 @@ ggsave(filename = paste(output, "3Dfig1LDDMMAlpha04.svg", sep = ""),
 
 # Figure: BM continuous traits --------------------------------------------
 
-simResPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
-simRes2550PC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults25char50char.rds")
-simRes500PC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults500char.rds")
+simResPC1PC2 <- readRDS("resultsGit/simulationResults.rds")
+simRes2550PC1PC2 <- readRDS("resultsGit/simulationResults25char50char.rds")
+simRes500PC1PC2 <- readRDS("resultsGit/simulationResults500char.rds")
 
 simResPC1PC2 <- c(simResPC1PC2, simRes2550PC1PC2, simRes500PC1PC2)
 
