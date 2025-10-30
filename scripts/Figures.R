@@ -451,7 +451,7 @@ ggsave(paste(output, "varRateSetRateConflictingFigurePC1PC2.svg", sep = ""), p3,
 # Figure: baseline tree and pca tree --------------------------------------
 
 tree <- phyloList[[1]]
-datasetD <- read.csv("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/fastBMSimRes/fastBMTree1NumChar50SetRate0.1PropConflicting0Dataset100.csv", row.names = 1)
+datasetD <- read.csv("resultsGit/fastBMTree1NumChar50SetRate0.1PropConflicting0Dataset100.csv", row.names = 1)
 pca <- prcomp(datasetD)
 pcDistMat<- dist(pca$x[,1:2])
 njTree <- nj(pcDistMat)
@@ -535,40 +535,8 @@ ggsave(paste(output, "examplePCAPlot.svg", sep = ""), p2, width = 10, height = 8
 
 # Figure: LDDMM results ---------------------------------------------------
 
-# pc12 <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/")
-# res <- parallel::mclapply(pc12, function(i){
-#   return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/", i, sep = "")))
-#   }, mc.cores = 10)
-# resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
-# for(i in 1:length(res)){
-#   resmat[i, ] <- as.numeric(res[[i]])
-#   if(i %% 100 == 0 ){
-#     print(i)
-#   }
-# }
-# colnames(resmat) <- names(res[[i]])
-# resmat <- as.data.frame(resmat)
-# summary(resmat)
-# saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
-# 
-# allPCs <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/")
-# res <- parallel::mclapply(allPCs, function(i){
-#   return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/", i, sep = "")))
-# }, mc.cores = 10)
-# resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
-# for(i in 1:length(res)){
-#   resmat[i, ] <- as.numeric(res[[i]])
-#   if(i %% 100 == 0 ){
-#     print(i)
-#   }
-# }
-# colnames(resmat) <- names(res[[i]])
-# resmat <- as.data.frame(resmat)
-# summary(resmat)
-# saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
-
-resPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
-resAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
+resPC1PC2 <- readRDS("resultsGit/lddmmPC12results.rds")
+resAll <- readRDS("resultsGit/lddmmPCallresults.rds")
 
 resPC1PC2$numLandmarks <- as.factor(resPC1PC2$numLandmarks)
 resPC1PC2$Dimension <- as.factor(resPC1PC2$Dimension)
@@ -600,40 +568,8 @@ ggsave(paste(output, "PC1PC2SPRDist.svg", sep = ""), p1, width = 10, height = 5)
 
 
 #procrustes
-pc12 <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/")
-res <- parallel::mclapply(pc12, function(i){
-  return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/", i, sep = "")))
-  }, mc.cores = 10)
-resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
-for(i in 1:length(res)){
-  resmat[i, ] <- as.numeric(res[[i]])
-  if(i %% 100 == 0 ){
-    print(i)
-  }
-}
-colnames(resmat) <- names(res[[i]])
-resmat <- as.data.frame(resmat)
-summary(resmat)
-saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPC12results.rds")
-
-allPCs <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs/")
-res <- parallel::mclapply(allPCs, function(i){
-  return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs/", i, sep = "")))
-}, mc.cores = 10)
-resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
-for(i in 1:length(res)){
-  resmat[i, ] <- as.numeric(res[[i]])
-  if(i %% 100 == 0 ){
-    print(i)
-  }
-}
-colnames(resmat) <- names(res[[i]])
-resmat <- as.data.frame(resmat)
-summary(resmat)
-saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPCallresults.rds")
-
-resProcPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPC12results.rds")
-resProcAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmProcrustesPCallresults.rds")
+resProcPC1PC2 <- readRDS("resultsGit/lddmmProcrustesPC12results.rds")
+resProcAll <- readRDS("resultsGit/lddmmProcrustesPCallresults.rds")
 
 
 # tree cloud --------------------------------------------------------------
@@ -651,7 +587,7 @@ for(i in 1:10){
     geom_tiplab(fontface = 4)+
     xlim(NA, 5)
   p1
-  ggsave(filename = paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/manuscript/figures/treeCloud/tree", 
+  ggsave(filename = paste("/manuscript/figures/treeCloud/tree", 
                           i,
                           ".svg",
                           sep = ""),
@@ -662,9 +598,9 @@ for(i in 1:10){
 
 # Figure: BM continuous traits line plot --------------------------------------------
 
-simResPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults.rds")
-simRes2550PC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults25char50char.rds")
-simRes500PC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/simulationResults500char.rds")
+simResPC1PC2 <- readRDS("resultsGit/simulationResults.rds")
+simRes2550PC1PC2 <- readRDS("resultsGit/simulationResults25char50char.rds")
+simRes500PC1PC2 <- readRDS("resultsGit/simulationResults500char.rds")
 
 simResPC1PC2 <- c(simResPC1PC2, simRes2550PC1PC2, simRes500PC1PC2)
 
@@ -727,40 +663,8 @@ ggsave(paste(output, "varRateSetRateConflictingFigurePC1PC2BoxPlot.svg", sep = "
 
 # Figure: LDDMM results line plot ---------------------------------------------------
 
-# pc12 <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/")
-# res <- parallel::mclapply(pc12, function(i){
-#   return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/", i, sep = "")))
-#   }, mc.cores = 10)
-# resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
-# for(i in 1:length(res)){
-#   resmat[i, ] <- as.numeric(res[[i]])
-#   if(i %% 100 == 0 ){
-#     print(i)
-#   }
-# }
-# colnames(resmat) <- names(res[[i]])
-# resmat <- as.data.frame(resmat)
-# summary(resmat)
-# saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
-# 
-# allPCs <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/")
-# res <- parallel::mclapply(allPCs, function(i){
-#   return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/", i, sep = "")))
-# }, mc.cores = 10)
-# resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
-# for(i in 1:length(res)){
-#   resmat[i, ] <- as.numeric(res[[i]])
-#   if(i %% 100 == 0 ){
-#     print(i)
-#   }
-# }
-# colnames(resmat) <- names(res[[i]])
-# resmat <- as.data.frame(resmat)
-# summary(resmat)
-# saveRDS(resmat, file = "/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
-
-resPC1PC2 <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPC12results.rds")
-resAll <- readRDS("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/lddmmPCallresults.rds")
+resPC1PC2 <- readRDS("resultsGit/lddmmPC12results.rds")
+resAll <- readRDS("resultsGit/lddmmPCallresults.rds")
 
 resPC1PC2$numLandmarks <- as.factor(resPC1PC2$numLandmarks)
 resPC1PC2$Dimension <- as.factor(resPC1PC2$Dimension)

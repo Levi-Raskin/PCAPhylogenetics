@@ -705,6 +705,71 @@ x <- unlist(res)
 table(x)
 
 
+# Save results as a rds
+pc12 <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/")
+res <- parallel::mclapply(pc12, function(i){
+  return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistances/", i, sep = "")))
+  }, mc.cores = 10)
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+resmat <- as.data.frame(resmat)
+summary(resmat)
+saveRDS(resmat, file = "resultsGit/lddmmPC12results.rds")
+
+allPCs <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/")
+res <- parallel::mclapply(allPCs, function(i){
+  return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesAllPCs/", i, sep = "")))
+}, mc.cores = 10)
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+resmat <- as.data.frame(resmat)
+summary(resmat)
+saveRDS(resmat, file = "resultsGit/lddmmPCallresults.rds")
+
+pc12 <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/")
+res <- parallel::mclapply(pc12, function(i){
+  return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustes/", i, sep = "")))
+}, mc.cores = 10)
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+resmat <- as.data.frame(resmat)
+summary(resmat)
+saveRDS(resmat, file = "resultsGit/lddmmProcrustesPC12results.rds")
+
+allPCs <- list.files("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs/")
+res <- parallel::mclapply(allPCs, function(i){
+  return(data.table::fread(paste("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMDistancesProcrustesAllPCs/", i, sep = "")))
+}, mc.cores = 10)
+resmat <- matrix(data = NA, nrow = length(res), ncol = 6)
+for(i in 1:length(res)){
+  resmat[i, ] <- as.numeric(res[[i]])
+  if(i %% 100 == 0 ){
+    print(i)
+  }
+}
+colnames(resmat) <- names(res[[i]])
+resmat <- as.data.frame(resmat)
+summary(resmat)
+saveRDS(resmat, file = "resultsGit/lddmmProcrustesPCallresults.rds")
+
 ### efficient LDDMM proc ####
 
 ## PC1, 2
