@@ -12,9 +12,10 @@ library(phytools)
 library(plotly)
 library(RColorBrewer)
 
-output <- "/Users/levir/Documents/GitHub/PCAPhylogenetics/manuscript/figures/"
+setwd("/Users/levir/Documents/GitHub/PCAPhylogenetics")
+output <- "manuscript/figures/"
 
-treeSubset <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/sampledTrees.tsv")
+treeSubset <- read.delim("resultsGit/sampledTrees.tsv")
 
 #convert to phylo object
 phyloList <- list()
@@ -35,7 +36,7 @@ p1
 ggsave(paste(output, "tree1LDDMMContTraits.svg", sep = ""), p1)
 
 #LDDMMM stacks
-lddmmRes1Alpha0.2 <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes/twoDimensionSimTreeIndex0LM10Alpha0.100000Dataset1nodeShapes.tsv", header = FALSE)
+lddmmRes1Alpha0.2 <- read.delim("resultsGit/twoDimensionSimTreeIndex0LM10Alpha0.100000Dataset1nodeShapes.tsv", header = FALSE)
 colnames(lddmmRes1Alpha0.2) <- c("taxon", "id", "x", "y")
 lddmmRes1Alpha0.2$taxon <- gsub("_", lddmmRes1Alpha0.2$taxon, replacement = " ")
 
@@ -101,7 +102,7 @@ ggsave(paste(output, "fig1LDDMMAlpha0.1.svg", sep = ""),
        height = 42)
 
 
-lddmmRes1Alpha0.2 <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes/twoDimensionSimTreeIndex0LM10Alpha0.200000Dataset1nodeShapes.tsv", header = FALSE)
+lddmmRes1Alpha0.2 <- read.delim("resultsGit/twoDimensionSimTreeIndex0LM10Alpha0.200000Dataset1nodeShapes.tsv", header = FALSE)
 colnames(lddmmRes1Alpha0.2) <- c("taxon", "id", "x", "y")
 lddmmRes1Alpha0.2$taxon <- gsub("_", lddmmRes1Alpha0.2$taxon, replacement = " ")
 
@@ -124,7 +125,7 @@ ggsave(paste(output, "fig1LDDMMAlpha0.2.svg", sep = ""),
        width = 2,
        height = 42)
 
-lddmmRes1Alpha0.2 <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes/twoDimensionSimTreeIndex0LM10Alpha0.300000Dataset1nodeShapes.tsv", header = FALSE)
+lddmmRes1Alpha0.2 <- read.delim("resultsGit/twoDimensionSimTreeIndex0LM10Alpha0.300000Dataset1nodeShapes.tsv", header = FALSE)
 colnames(lddmmRes1Alpha0.2) <- c("taxon", "id", "x", "y")
 lddmmRes1Alpha0.2$taxon <- gsub("_", lddmmRes1Alpha0.2$taxon, replacement = " ")
 
@@ -147,7 +148,7 @@ ggsave(paste(output, "fig1LDDMMAlpha0.3.svg", sep = ""),
        width = 2,
        height = 42)
 
-lddmmRes1Alpha0.2 <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes/twoDimensionSimTreeIndex0LM10Alpha0.400000Dataset1nodeShapes.tsv", header = FALSE)
+lddmmRes1Alpha0.2 <- read.delim("resultsGit/twoDimensionSimTreeIndex0LM10Alpha0.400000Dataset1nodeShapes.tsv", header = FALSE)
 colnames(lddmmRes1Alpha0.2) <- c("taxon", "id", "x", "y")
 lddmmRes1Alpha0.2$taxon <- gsub("_", lddmmRes1Alpha0.2$taxon, replacement = " ")
 
@@ -172,7 +173,7 @@ ggsave(paste(output, "fig1LDDMMAlpha0.4.svg", sep = ""),
 
 
 ### 3D
-lddmmRes1Alpha0.2 <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/SimRes/LDDMMSimRes/threeDimensionSimTreeIndex0LM10Alpha0.100000Dataset1nodeShapes.tsv", header = FALSE)
+lddmmRes1Alpha0.2 <- read.delim("resultsGit//threeDimensionSimTreeIndex0LM10Alpha0.100000Dataset1nodeShapes.tsv", header = FALSE)
 colnames(lddmmRes1Alpha0.2) <- c("taxon", "id", "x", "y", "z")
 lddmmRes1Alpha0.2$taxon <- gsub("_", lddmmRes1Alpha0.2$taxon, replacement = " ")
 
