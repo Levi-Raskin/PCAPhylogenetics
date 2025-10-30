@@ -78,16 +78,7 @@ sprMast2 <- function(tree1, tree2){
 }
 
 
-#read tree trace
-# trees <- data.table::fread("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/hominin.trees",
-                           # nThread = 10)
-#burn in
-# trees <- trees[round(0.1 * nrow(trees)) : nrow(trees),]
-# sample 1,000 trees from the posterior distribution
-# treeSubset <- trees[sample(1:nrow(trees), 1000, replace = FALSE), ]
-# rm(trees)
-# write.csv(treeSubset,"/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/sampledTrees.csv")
-treeSubset <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/results/Mongle_et_al_2023_RB/sampledTrees.tsv")
+treeSubset <- read.delim("/Users/levir/Documents/GitHub/PCAPhylogenetics/resultsGit/Mongle_et_al_2023_RB/sampledTrees.tsv")
 
 #convert to phylo object
 phyloList <- list()
