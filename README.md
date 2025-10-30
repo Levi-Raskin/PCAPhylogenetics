@@ -22,7 +22,7 @@ scripts
     - RevBayes file for posterior distribution generation
 
 resultsGit
-  - includes all the files needed to reproduce the results we got in our paper. Does not include raw simulated data or the raw tree file as that would be too large to store in github. Reach out to levi_raskin@berkeley.edu for access to the raw data.
+  - includes all the files needed to reproduce the results we got in our paper. Does not include raw simulated data or the raw tree file as that would be too large to store in github. Reach out to [Levi Raskin](mailto:levi_raskin@berkeley.edu) for access to the raw data.
 
 manuscript
   - contains figures as svg, jpg, and adobe illustrator files
