@@ -1,6 +1,6 @@
-This is the GitHub repo for Raskin et al. (2025) Principal Components Analysis fails to recover phylogenetic structure in hominins.
+This is the GitHub repo for Raskin et al. (2025) Principal Components Analysis fails to recover phylogenetic structure in hominins. 
 
-This code works and should be sufficient to reproduce our analysis, but be forewarned that this code is not guaranteed in any way. Please reach out to [Levi Raskin](mailto:levi_raskin@berkeley.edu) if there are any issues and I would be very happy to help.
+This code works and should be sufficient to reproduce our analysis, but be forewarned that this code is not guaranteed in any way. Please reach out to [Levi Raskin](mailto:levi_raskin@berkeley.edu) if there are any issues and I would be very happy to help. The data that supports the findings of this study are openly available on Dryad at doi.org/10.5061/dryad.mcvdnckg2.
 
 It has 5 subfolders.
 
